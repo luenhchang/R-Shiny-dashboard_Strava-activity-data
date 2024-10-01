@@ -1,12 +1,10 @@
 #-----------------------------------------------------------------------------------------------------------------
-# Program: C:/GoogleDrive_MyDrive/scripts/R-Shinyapp_Strava-activity-data/global.R
-# Date created: 27-SEP-2024
+# Program: C:/GoogleDrive_MyDrive/scripts/RProject_Shinyapp_Strava-activity-data/global.R
+# Modified from: C:/GoogleDrive_MyDrive/scripts/R-Shinyapp_Strava-activity-data/global.R
+# Date created: 01-OCT-2024
 # Author(s): Lun-Hsien Chang
-# Modified from: 
-## C:/GoogleDrive_MyDrive/scripts/R-shinyapp_data-in-everyday-lives/global.R
-## C:/GoogleDrive_MyDrive/scripts/R-shinyapp_data-in-everyday-lives/server.R
 # Input: 
-# Output: https://luenhchang.shinyapps.io/data-in-everyday-lives/
+# Output: 
 # References
 ## [How to Scrape and Store Strava Data Using R](https://rviews.rstudio.com/2021/11/22/strava-data/)
 ## [rStrava](https://fawda123.github.io/rStrava/)
@@ -15,10 +13,10 @@
 
 ## Date       Changes:
 ##--------------------------------------------------------------------------------------------------------------
-## 2024-07-21 Run App locally with no problems. Deployment error: Error in gs4_auth() : Can't get Google credentials. Solved by adding googlesheets4::gs4_deauth() 
-##------------------------------------------------------------------------------------------------------------------
+## 2024-10
+##--------------------------------------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------
 # Load R packages
 ## Required uninstalled packages in local PC will cause errors library(pkg) is not available while deploying app to shinyapps.io
 #-----------------------------------------------------------------------------------------------------------------
@@ -33,6 +31,7 @@ library(DT)
 library(plotly)
 library(httr)
 library(hms)
+library(jsonlite)
 
 #------------------------------------------------------------------------
 # Directory in local PC
@@ -40,7 +39,7 @@ library(hms)
 ## www: Where all the images and other assets needed for the viewer
 #------------------------------------------------------------------------
 dir.C <- "C:"
-dir.app <- file.path(dir.C, "GoogleDrive_MyDrive","scripts","R-Shinyapp_Strava-activity-data")
+dir.app <- file.path(dir.C, "GoogleDrive_MyDrive","scripts","RProject_Shinyapp_Strava-activity-data")
 dir.data <- file.path(dir.app,"data")
 # dir.www <- file.path(dir.app,"www")
 # dir.create(path = dir.www)
@@ -97,7 +96,7 @@ not_any_na <- function(x) all(!is.na(x)) # if any value is NA
 act_data <- rStrava::compile_activities(my_acts) |>
   # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
   dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 897 52
+# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 922 52
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -111,59 +110,12 @@ poolswim <- act_data |>
   dplyr::filter(grepl(pattern="^Indoor pool swim", x=name)) |>
   dplyr::select(dplyr::any_of(common.columns),average_heartrate, max_heartrate) |>
   # Format seconds to hh::mm::ss
-  dplyr::mutate(moving_time_hhmmss=hms::as_hms(moving_time)) # dim(poolswim) 83 8
+  dplyr::mutate(moving_time_hhmmss=hms::as_hms(moving_time)) # dim(poolswim) 98 8
 
+#--------------------------
 # Read single activity data
+#--------------------------
 id.indoor.pool.swim.93 <- "12073687830"
-
-library(httr)
-library(jsonlite)
-# Define the API endpoint
-activity_id <- id.indoor.pool.swim.93
-
-endpoint <- paste0("https://www.strava.com/api/v3/activities/", activity_id, "/streams")
-
-# Make the request to fetch data
-response <- GET(endpoint, 
-                add_headers(Authorization = paste("Bearer", stoken)))
-
-# Parse the JSON response
-streams <- fromJSON(content(response, as = "text", encoding = "UTF-8"))
-
-# Check the structure of the response
-str(streams)
-
-# Print error messages, if any
-if ("errors" %in% names(streams)) {
-  print(streams$errors)
-}
-
-if ("message" %in% names(streams)) {
-  print(streams$message)
-}
-
-# Make the request
-response <- httr::GET(endpoint, add_headers(Authorization = paste("Bearer", stoken)))
-
-# Parse the JSON response
-streams <- httr::content(response, as = "parsed", type = "application/json") # class(streams) "list"
-
-# Convert JSON to a data frame (example for heart rate data)
-heart_rate_data <- streams[[which(sapply(streams, function(x) x$type) == "heartrate")]]
-
-# Access and print each component
-for (stream in streams) {
-  print(stream$type)
-}
-
-# Convert to data frame
-heart_rate_df <- data.frame(
-  time = heart_rate_data$time,
-  heart_rate = heart_rate_data$data
-)
-# Fetch activity streams data
-streams <- rStrava::get_activity_streams(id = id.indoor.pool.swim.93
-                                         , types = c("heartrate", "time", "distance"))
 
 activity_data <- rStrava::get_activity(id = id.indoor.pool.swim.93, stoken=stoken)
 
@@ -177,7 +129,7 @@ stats_df <- as.data.frame(t(unlist(activity_data$stats)), stringsAsFactors = FAL
 activity_df <- bind_cols(activity_df, stats_df)
 
 # Print the resulting data frame
-print(activity_df)
+#print(activity_df)
 
 #------------------------------------------------------------
 # Read swim log from Google sheet
@@ -216,7 +168,7 @@ poolswim.log <- googlesheets4::read_sheet(sheet_id
 poolswim.combined <- dplyr::left_join(
   x=poolswim.log
   ,y=poolswim[,c("name","start_date_local","average_heartrate", "max_heartrate")]
-  ,by=c("Strava_activity_name"="name") ) # dim(poolswim.combined) 7 19
+  ,by=c("Strava_activity_name"="name") ) # dim(poolswim.combined) 22 19
 
 #*****************************************
 # Read data to use under menuItem "Walk" 
@@ -243,8 +195,7 @@ walk <- act_data |>
                   ,"Distance :", distance, "km", "\n"
                   ,"Moving time :", moving_time_period, "\n"
                   ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-                ) 
-  # dim(walk) 54 14
+                ) # dim(walk) 69 14
 
 # Read a single activity of Walk from Strava using id
 ## [Retrieve streams for Strava activities, and convert to a dataframe](https://rdrr.io/cran/rStrava/man/get_activity_streams.html)
@@ -282,7 +233,7 @@ run <- act_data |>
       ,"Distance :", distance, "km", "\n"
       ,"Moving time :", moving_time_period, "\n"
       ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-  ) # dim(run) 16 16
+  ) # dim(run) 17 16
 
 # Plot average speed by splits for a single activity interval run
 # activity.11732270119 <- rStrava::get_spdsplits(
@@ -310,7 +261,7 @@ ride <- act_data |>
       ,"Avg speed :", average_speed, "km/h","\n"
       ,"Elevation gain :", total_elevation_gain, "m"
       )
-    ) # dim(ride) 49 16
+    ) # dim(ride) 49 14
 
 # activity.11826580247 <- rStrava::get_activity_streams(
 #   my_acts
