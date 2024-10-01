@@ -41,6 +41,9 @@ library(jsonlite)
 dir.C <- "C:"
 dir.app <- file.path(dir.C, "GoogleDrive_MyDrive","scripts","RProject_Shinyapp_Strava-activity-data")
 dir.data <- file.path(dir.app,"data")
+dir.fitness <- file.path(dir.C, "GoogleDrive_MyDrive","Fitness")
+dir.Strava <- file.path(dir.fitness,"Strava")
+dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
 # dir.www <- file.path(dir.app,"www")
 # dir.create(path = dir.www)
 # dir.img <- file.path(dir.www,"image_data-challenges")
@@ -282,13 +285,33 @@ ride <- act_data |>
 #   act_id=11826580247
 #   ,stoken
 #   ,units = "metric") # dim(speed.splits.11826580247) 41 3
+format.datetime <- "%b %d, %Y, %I:%M:%S %p"
 
+# 2024-10-01T02:35:06Z is in UTC. The "Z" at the end stands for Zulu time, which is another way to indicate UTC (Coordinated Universal Time).
+act_data.1 <- act_data %>%
+  dplyr::select(id, start_date, name, gear_id, sport_type, distance, total_elevation_gain, elapsed_time, moving_time,average_heartrate, max_heartrate) %>%
+  dplyr::rename(start.datetime.UTC=start_date) %>%
+  dplyr::mutate(
+    start.date.UTC=lubridate::date(start.datetime.UTC)
+    ,start.datetime.local=case_when(
+      start.date.UTC >= ymd('2023-01-16') & start.date.UTC <= ymd('2023-02-05')~
+        as.POSIXct(start.datetime.UTC, tz="Asia/Kuala_Lumpur")
+      ,start.date.UTC >= ymd('2023-09-02') & start.date.UTC <= ymd('2023-10-02') ~ as.POSIXct(start.datetime.UTC, tz="Asia/Taipei")
+      ,TRUE ~ as.POSIXct(start.datetime.UTC, tz="Australia/Brisbane")
+      )
+    ,start.date.local=lubridate::date(start.datetime.local)
+    ,start.year.local=lubridate::year(start.datetime.local)
+    ,start.dayofyear.local=lubridate::yday(start.datetime.local)
+    ,start.month.local=lubridate::month(start.datetime.local)
+    ,start.day.local=weekdays(start.datetime.local)
+    ,start.week.local=lubridate::week(start.datetime.local)
+    ) # dim(act_data.1) 922 19
 #-----------------------
 # Analyse activities.csv
 #-----------------------
 # Download activities.csv from Google drive
 ## https://drive.google.com/file/d/1bx8iaRnjf4jATc4yWnB0-McLlDFpJZRP/view?usp=drive_link
-df <- read.csv(file = file.path(dir.data,"activities.csv"), header = TRUE) # dim(df) 657 87
+df <- read.csv(file = file.path(dir.Strava.export_37641772,"activities.csv"), header = TRUE) # dim(df) 922 94
 
 format.datetime <- "%b %d, %Y, %I:%M:%S %p"
 
@@ -317,8 +340,21 @@ activities.df <- df |>
     ,elevation.gain.m= Elevation.Gain # Elevation gain in meters
     ,elapsed.time.hour=Elapsed.Time/60/60
     ,moving.time.hour=Moving.Time/60/60) |>
-  dplyr::select(-Distance, -Elevation.Gain, -Elapsed.Time, -Moving.Time) # dim(activities.df) 657 19
+  dplyr::select(-Distance, -Elevation.Gain, -Elapsed.Time, -Moving.Time) # dim(activities.df) 922 19
 
+activities.2023 <- activities.df |> 
+    dplyr::filter(start.year.local==2023 & Activity.Type %in% c("Ride","Run","Swim","Workout","Walk")) |>
+    # Split Activity.Type="Workout"
+    dplyr::mutate(activity.type=dplyr::case_when(
+      grepl(pattern="table tennis", x=Activity.Name, ignore.case=TRUE) ~ 
+        stringi::stri_trans_totitle("table tennis")
+      ,grepl(pattern="badminton", x=Activity.Name, ignore.case=TRUE) ~ 
+        stringi::stri_trans_totitle("badminton")
+      ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=Activity.Name, ignore.case=TRUE) ~ 
+        stringi::stri_trans_totitle("strength & stability workout")
+      ,grepl(pattern="bike fitting", x=Activity.Name, ignore.case=TRUE) ~ 
+        stringi::stri_trans_totitle("bike fitting")
+      ,TRUE ~ Activity.Type )) # dim(activities.2023) 341 20
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
