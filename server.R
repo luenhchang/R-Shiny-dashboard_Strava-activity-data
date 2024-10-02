@@ -1,13 +1,12 @@
-#-------------------------------------------------------------------------------------------------------------------
-# Program: C:/GoogleDrive/scripts/R-Shinyapp_Strava-activity-data/server.R
-# Date created: 19-JUL-2024
+#----------------------------------------------------------------------------------------------------------
+# Program: C:/GoogleDrive_MyDrive/scripts/RProject_Shinyapp_Strava-activity-data/server.R
+# Date created: 02-OCT-2024
 # Author(s): Lun-Hsien Chang
-# Modified from: C:/GoogleDrive/scripts/R-shinyapp_data-in-everyday-lives/server.R
-# Dependency:
+# Modified from: C:/GoogleDrive/scripts/R-Shinyapp_Strava-activity-data/server.R
 # Reference
 ## [R plotly hover label text alignment](https://stackoverflow.com/questions/50003531/r-plotly-hover-label-text-alignment)
 ## Date       Changes:
-##--------------------------------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------------------------
 ## 2024-06-04 Added plotly bar plot subplots, one per food category. Currently no control on bar color and subplot titles
 ## 2024-05-16 Commented out shiny::renderUI({rmarkdown::render() shiny::includeHTML('menuItem-Fitness.html') }). Now includeHTML() is used to read a html file, which was knitted as html_fragment in .Rmd files
 ## 2024-05-07 Added a linebreak in renderDataTable with 2 steps: (1) add <br> as linebreak symbol, (2) set datatable(escape=FALSE)
@@ -15,7 +14,7 @@
 ## 2024-05-06 Used valueBox(subtitle=HTML(paste(br()))) to add a new line in valueBox subtitle. 
 ## 2024-04-24 Created function.renderValueBox(), function.renderInfoBox() with optional arguments that have default values to generate script for renderValueBox(), renderInfoBox()
 ## 2024-04-23 Added a image slideshow under menuItem Data 
-##--------------------------------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------------------------
 
 # Color
 color.global.infoBox <- "olive"
