@@ -17,10 +17,10 @@
 ## 2024-10
 ##---------------------------------------------------------------------------------------------------------
 
-#----------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------
 # Load R packages
 ## Required uninstalled packages in local PC will cause errors library(pkg) is not available while deploying app to shinyapps.io
-#-----------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------
 library(shiny)
 library(shinydashboard)
 library(dplyr)
@@ -33,6 +33,8 @@ library(plotly)
 library(httr)
 library(hms)
 library(jsonlite)
+library(pals)
+library(rsconnect)
 
 #------------------------------------------------------------------------
 # Directory in local PC
@@ -287,31 +289,6 @@ ride <- act_data |>
 #   ,stoken
 #   ,units = "metric") # dim(speed.splits.11826580247) 41 3
 
-# Load the lubridate package
-library(lubridate)
-
-# Define the UTC datetime as a string
-utc_time_string <- "2024-10-01 02:35:06"
-
-# Convert the string to POSIXct in UTC
-utc_time <- as.POSIXct(utc_time_string, format = "%Y-%m-%d %H:%M:%S", tz = "GMT")
-format(utc_time, tz="Australia/Brisbane",usetz=TRUE)
-
-# Convert to AEST (Australia/Brisbane)
-aest_time <- with_tz(utc_time, tzone = "Australia/Brisbane")
-
-df <- data.frame(..., stringsAsFactors=FALSE)
-
-df$utc_time_stamp <- as.POSIXct(df$utc_time_stamp, format="%Y-%m-%d %H:%M:%S", tz='GMT')
-
-tz_v <- Vectorize(function(x,y) {format(x, tz=y, usetz=TRUE)})
-
-df$new_local_time <- tz_v(df$utc_time_stamp, df$time_zone)
-df
-
-# Print the result
-print(aest_time)
-
 # 2024-10-01T02:35:06Z is in UTC. The "Z" at the end stands for Zulu time, which is another way to indicate UTC (Coordinated Universal Time).
 act_data.1 <- act_data %>%
   dplyr::select(id, start_date, name, gear_id, sport_type, distance, total_elevation_gain, elapsed_time, moving_time,average_heartrate, max_heartrate) %>%
@@ -344,21 +321,44 @@ act_data.1 <- act_data %>%
 # Process 2023 data
 #------------------
 activities.2023 <- act_data.1 %>%
-  dplyr::filter(start.year.local==2023 & sport_type %in% c("Ride","Run","Swim","Workout","Walk")) %>%
+  dplyr::filter(start.year.local==2023) %>%
   # Split sport_type="Workout"
   dplyr::mutate(activity.type=dplyr::case_when(
      grepl(pattern="table tennis", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("table tennis")
     ,grepl(pattern="badminton", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("badminton")
     ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("strength & stability workout")
     ,grepl(pattern="bike fitting", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("bike fitting")
-    ,TRUE ~ sport_type )) # dim(activities.2023) 372 21
+    ,TRUE ~ sport_type )
+    ) # dim(activities.2023) 404 21
 
 #------------------
 # Process 2024 data
 #------------------
 activities.2024 <- act_data.1 %>%
-  dplyr::filter(start.year.local==2024 & sport_type %in% c("Ride","Run","Swim","Workout","Walk"))
+  dplyr::filter(start.year.local==2024) %>%
+  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 218 21
 
+#-----------------------------------------------------------
+# Check which shinyapps.io account is used before deployment
+#-----------------------------------------------------------
+#rsconnect::accountInfo()
+# $name
+# [1] "luenhchang"
+# 
+# $server
+# [1] "shinyapps.io"
+# 
+# $accountId
+# [1] "981190"
+# 
+# $token
+# [1] "A9C5D75F89CEC1B84E8F1CCFEEBB5CF1"
+# 
+# $secret
+# [1] "W10qQN... (redacted)"
+# 
+# $username
+# [1] "luenhchang"
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
 #************************************************************************************************#
