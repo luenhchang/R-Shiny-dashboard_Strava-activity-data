@@ -305,7 +305,26 @@ act_data.1 <- act_data %>%
     ,start.month.local=lubridate::month(start.datetime.local)
     ,start.day.local=weekdays(start.datetime.local)
     ,start.week.local=lubridate::week(start.datetime.local)
-    ) # dim(act_data.1) 922 19
+    # Change distance to meters for swim later
+    ,distance.km=distance
+    ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
+    ,elapsed.time.hour=elapsed_time/60/60
+    ,moving.time.hour= moving_time/60/60) %>%
+  dplyr::select(-distance, -total_elevation_gain, -elapsed_time, -moving_time) # dim(act_data.1) 922 19
+
+#------------------
+# Process 2023 data
+#------------------
+activities.2023 <- act_data.1 %>%
+  dplyr::filter(start.year.local==2023 & sport_type %in% c("Ride","Run","Swim","Workout","Walk")) %>%
+  # Split sport_type="Workout"
+  dplyr::mutate(activity.type=dplyr::case_when(
+     grepl(pattern="table tennis", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("table tennis")
+    ,grepl(pattern="badminton", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("badminton")
+    ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("strength & stability workout")
+    ,grepl(pattern="bike fitting", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("bike fitting")
+    ,TRUE ~ sport_type )) # dim(activities.2023) 372 20
+
 #-----------------------
 # Analyse activities.csv
 #-----------------------
