@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------
 # Program: C:/GoogleDrive_MyDrive/scripts/RProject_Shinyapp_Strava-activity-data/global.R
 # Modified from: C:/GoogleDrive_MyDrive/scripts/R-Shinyapp_Strava-activity-data/global.R
 # Date created: 01-OCT-2024
@@ -10,11 +10,12 @@
 ## [rStrava](https://fawda123.github.io/rStrava/)
 ## [dplyr r : selecting columns whose names are in an external vector [duplicate]](https://stackoverflow.com/questions/68749491/dplyr-r-selecting-columns-whose-names-are-in-an-external-vector)
 ## [Rounding duration or period to full minutes with lubridate](https://stackoverflow.com/questions/64929984/rounding-duration-or-period-to-full-minutes-with-lubridate)
+## [Converting UTC time to local standard time in R](https://stackoverflow.com/questions/31325072/converting-utc-time-to-local-standard-time-in-r)
 
 ## Date       Changes:
-##--------------------------------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------------------------
 ## 2024-10
-##--------------------------------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------------------------------
 # Load R packages
@@ -339,10 +340,6 @@ act_data.1 <- act_data %>%
     ,moving.time.hour= moving_time/60/60) %>%
   dplyr::select(-distance, -total_elevation_gain, -elapsed_time, -moving_time) # dim(act_data.1) 922 20
 
-# Check the final result
-print(tail(act_data.1$start.datetime.local, n = 1))
-
-
 #------------------
 # Process 2023 data
 #------------------
@@ -354,7 +351,7 @@ activities.2023 <- act_data.1 %>%
     ,grepl(pattern="badminton", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("badminton")
     ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("strength & stability workout")
     ,grepl(pattern="bike fitting", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("bike fitting")
-    ,TRUE ~ sport_type )) # dim(activities.2023) 372 20
+    ,TRUE ~ sport_type )) # dim(activities.2023) 372 21
 
 #------------------
 # Process 2024 data
