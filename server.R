@@ -71,6 +71,92 @@ server <- function(input, output, session) {
     }) # Close renderInfoBox()
   }# Close function{}
   
+  #**********************************************
+  # Outputs to use under menuItem "Moving time"
+  #**********************************************
+  output$plot.barplot.activity.moving.time.2023 <- shiny::renderPlot({
+    data.barplot.moving.time <- activities.2023 %>%  
+      dplyr::filter(activity.type !="EBikeRide") # dim(data.barplot.moving.time) 387 21
+    
+    # Legend
+    plot.legend.ordered.barplot.moving.time <- sort(unique(data.barplot.moving.time$activity.type)) # length(plot.legend.ordered.barplot.moving.time) 9
+    
+    # Color. Use a palette with multiple distinct colors
+    colors.barplot.moving.time <- as.vector(pals::glasbey(n=length(plot.legend.ordered.barplot.moving.time)))
+    
+    # Pair legend item and color
+    legend.colors.barplot.moving.time <- c( Badminton=colors.barplot.moving.time[1]
+                                            ,`Bike Fitting`=colors.barplot.moving.time[2]
+                                            ,Ride=colors.barplot.moving.time[3]
+                                            ,Run=colors.barplot.moving.time[4]
+                                            ,`Strength & Stability workout`=colors.barplot.moving.time[5]
+                                            ,Swim=colors.barplot.moving.time[6]
+                                            ,`Table Tennis`=colors.barplot.moving.time[7]
+                                            ,Walk=colors.barplot.moving.time[8]
+                                            ,Yoga=colors.barplot.moving.time[9])
+    # Create a bar plot
+    barplot.daily.moving.time <- ggplot2::ggplot(data.barplot.moving.time
+                                                 ,aes(x=start.date.local
+                                                      ,y=moving.time.hour
+                                                      ,fill = activity.type))+
+      ggplot2::geom_bar(position = "stack", stat = "identity") + 
+      ggplot2::scale_x_date( 
+        limits = as.Date(c('2023-01-01','2023-12-31'))
+        ,expand = c(0, 0) # expand = c(0,0) to remove margins
+        ,date_breaks = "1 month"
+        ,date_minor_breaks = "1 week"
+        ,date_labels = "%b" # Abbreviated month name in current locale (Aug)
+        # Add a secondary x axis showing week number
+        # ,sec.axis = ggplot2::sec_axis(
+        #   trans= ~ .
+        #   ,breaks= c(seq.Date(as.Date("2023-01-01"), by="month", length.out = 12)
+        #              ,"2023-12-25")
+        #   ,labels= scales::date_format("%W"))
+      )+
+      ggplot2::scale_y_continuous(limits = c(0,8)
+                                  ,breaks = seq(from=0, to=8, by=1)
+                                  ,expand = c(0, 0) # expand = c(0,0) to remove margins
+      )+
+      ggplot2::labs(x = ""
+                    ,y = "Moving time (h)"
+                    ,fill="Activity type")+
+      # Remove default theme background color
+      ggplot2::theme_bw()+
+      ggplot2::theme_minimal()+
+      # Apply The Economist theme
+      ggthemes::theme_economist_white()+ # theme color gray
+      #ggthemes::theme_economist()+ # theme color pale green
+      ggplot2::theme(
+        # hjust controls horizontal justification and vjust controls vertical justification. Values between 0 and 1
+        ## hjust=0 means left-justified, hjust=1 means right-justified
+        legend.position = "top"
+        ,legend.justification='left'
+        ,legend.direction='horizontal'
+        ,legend.text = element_text(size = 15)
+        ,legend.box = "vertical"
+        # Reduce gap between legends
+        ,legend.spacing.y = unit(-0.25, "cm")
+        ,axis.title = element_text(size = 20)
+        ,axis.text = element_text(size = 15)
+        ,panel.grid.minor = element_blank()
+        ,panel.grid.major = element_line(color = "gray", linewidth = 0.5))+
+      # Change bar colors
+      ## Use ggplot2::scale_color_manual() to modify aesthetics = "colour"
+      ## Use ggplot2::scale_fill_manual() to modify aesthetics = "fill"
+      ggplot2::scale_fill_manual(
+        # Use palette from pals package. as.vector() needed to remove color name
+        values=legend.colors.barplot.moving.time
+        # Reorder legend items from most frequent to least frequent
+        # legend text longer than the cutoff is wrapped to multiple lines
+        ,limits=stringr::str_wrap(plot.legend.ordered.barplot.moving.time,width=20))+ 
+      # Control legend for fill= aesthetic
+      ## This has no effect. Legend items are still in two lines 
+      ggplot2::guides(colour = guide_legend(nrow = 1))
+    
+    # Return value as default display
+    return(barplot.daily.moving.time)
+  }) # Close renderPlot()
+  
   #*****************************************
   # Outputs to use under menuItem "Swim"
   #*****************************************
