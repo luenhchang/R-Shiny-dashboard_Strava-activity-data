@@ -1,8 +1,8 @@
-#----------------------------------------------------------------------------------------------------------------
-# Program: C:/GoogleDrive/scripts/R-Shinyapp_Strava-activity-data/ui.R
-# Date created: 19-JUL-2024
+#----------------------------------------------------------------------------------------------------------
+# Program: C:/GoogleDrive_MyDrive/scripts/RProject_Shinyapp_Strava-activity-data/ui.R
+# Date created: 02-OCT-2024
 # Author(s): Lun-Hsien Chang
-# Modified from: C:/GoogleDrive/scripts/R-shinyapp_data-in-everyday-lives/ui.R
+# Modified from: C:/GoogleDrive/scripts/R-Shinyapp_Strava-activity-data/ui.R
 # Dependency:
 # Input:
 ## menuItem-About.html
@@ -10,10 +10,10 @@
 # References
 ## [Horizontal Rule hr() in R Shiny Sidebar](https://stackoverflow.com/questions/43592163/horizontal-rule-hr-in-r-shiny-sidebar)
 ## Date       Changes:
-##---------------------------------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------------------------
 ## 2024-07-23 Added menuItem Walk
 ## 2024-07-21 Added menuItem Swim
-##---------------------------------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------------------------
 
 #---------------------------------
 # Webpage title on top left corner
