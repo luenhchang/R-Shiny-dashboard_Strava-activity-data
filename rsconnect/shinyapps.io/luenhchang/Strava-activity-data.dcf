@@ -1,0 +1,12 @@
+name: Strava-activity-data
+title: Strava-activity-data
+username: luenhchang
+account: luenhchang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12344944
+bundleId: 9173246
+url: https://luenhchang.shinyapps.io/Strava-activity-data/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

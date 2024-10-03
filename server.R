@@ -443,9 +443,9 @@ server <- function(input, output, session) {
       ) # Close layout
   })
   
-  #----------------------------------------------------------------------------------------
+  #--------------------
   # Output DT dataTable
-  #----------------------------------------------------------------------------------------
+  #--------------------
   output$table.run <- DT::renderDataTable({
     table.run <- run |> 
       dplyr::select(name, start_date, distance, moving_time_period, total_elevation_gain, pace_mmss_per_km_fmt, average_heartrate, max_heartrate ) |>
@@ -461,10 +461,10 @@ server <- function(input, output, session) {
                   ,options = list(autoWidth = TRUE, searching = TRUE))
   })
   
-  
-  
+  #*****************************************
+  # Read data to use under menuItem "Ride" 
+  #*****************************************
 
-  
 } # Close the server function
 
 #************************************************************************************************#

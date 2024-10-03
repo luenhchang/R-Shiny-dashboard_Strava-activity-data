@@ -11,7 +11,8 @@
 ## [dplyr r : selecting columns whose names are in an external vector [duplicate]](https://stackoverflow.com/questions/68749491/dplyr-r-selecting-columns-whose-names-are-in-an-external-vector)
 ## [Rounding duration or period to full minutes with lubridate](https://stackoverflow.com/questions/64929984/rounding-duration-or-period-to-full-minutes-with-lubridate)
 ## [Converting UTC time to local standard time in R](https://stackoverflow.com/questions/31325072/converting-utc-time-to-local-standard-time-in-r)
-
+## [R - Storing plotly objects inside a list](https://stackoverflow.com/questions/54466628/r-storing-plotly-objects-inside-a-list)
+## [plotly::sublot not showing both titles](https://stackoverflow.com/questions/68796762/plotlysublot-not-showing-both-titles)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
 ## 2024-10
@@ -53,6 +54,8 @@ dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
 # dir.img.annotated <- file.path(dir.www,"image_data-challenges-annotated") # dir.create(dir.img.annotated)
 # dir.data <- file.path(dir.app,"data")
 # dir.create(dir.data)
+
+usethis::use_git()
 
 #------------------------------
 # Scraping functions (no token)
@@ -247,48 +250,9 @@ run <- act_data |>
 #   ,stoken
 #   ,units = "metric") # dim(activity.11732270119) 3 3
 
-#*****************************************
-# Read data to use under menuItem "Ride" 
-#*****************************************
-# Subset running data
-ride <- act_data |>
-  dplyr::filter(sport_type=="Ride" & as.Date(start_date_local) >= as.Date("2024-01-01")) |>
-  dplyr::select(dplyr::any_of(common.columns), average_speed, total_elevation_gain, average_heartrate, max_heartrate) |>
-  dplyr::mutate(
-    # Date time to Date
-    start_date=as.Date(start_date_local)
-    # Convert seconds to lubridate duration
-    ,moving_time_period=lubridate::seconds_to_period(moving_time)
-    ,moving_time_duration=lubridate::as.duration(moving_time_period)
-    # Customise hover text
-    ,hovertext=paste(
-      "Event Name :", name, "\n"
-      ,"Distance :", distance, "km", "\n"
-      ,"Avg speed :", average_speed, "km/h","\n"
-      ,"Elevation gain :", total_elevation_gain, "m"
-      )
-    ) # dim(ride) 49 14
-
-# activity.11826580247 <- rStrava::get_activity_streams(
-#   my_acts
-#   ,stoken
-#   ,id = 11826580247
-#   ,types = NULL # types = NULL will get all columns
-# ) |>
-#   dplyr::mutate(pace_minutes=as.integer(minute(as.duration(1/velocity_smooth)*60*60))
-#                 ,pace_seconds=as.integer(second(as.duration(1/velocity_smooth)*60*60))
-#                 ,pace_mmss_per_km_fmt=sprintf("%02d:%02d", pace_minutes, pace_seconds)
-#                 )
-  # class(activity.11924685575) [1] "strframe"   "data.frame" # dim(activity.11826580247) 8281 9
-
-#plot(activity.11826580247$velocity_smooth, type = "l")
-
-# Get speed by splits for a single activity measured by speed/cadence sensor
-# speed.splits.11826580247 <- rStrava::get_spdsplits(
-#   act_id=11826580247
-#   ,stoken
-#   ,units = "metric") # dim(speed.splits.11826580247) 41 3
-
+#**************************
+# Process activity data
+#**************************
 # 2024-10-01T02:35:06Z is in UTC. The "Z" at the end stands for Zulu time, which is another way to indicate UTC (Coordinated Universal Time).
 act_data.1 <- act_data %>%
   dplyr::select(id, start_date, name, gear_id, sport_type, distance, total_elevation_gain, elapsed_time, moving_time,average_heartrate, max_heartrate) %>%
@@ -315,7 +279,111 @@ act_data.1 <- act_data %>%
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
     ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain, -elapsed_time, -moving_time) # dim(act_data.1) 922 20
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 922 22
+
+#*****************************************
+# Read data to use under menuItem "Ride" 
+#*****************************************
+# Subset running data
+ride <- act_data.1 |>
+  dplyr::select(id, name, sport_type, start.year.local, start.week.local, start.date.local, start.day.local, distance.km, moving_time, moving.time.hour, elevation.gain.m, average_heartrate, max_heartrate) |>
+  dplyr::filter(sport_type=="Ride") |>
+  dplyr::mutate(
+    # Convert seconds to lubridate duration
+    ,moving_time_period=lubridate::seconds_to_period(moving_time)
+    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 321 15
+
+# Read single activity (not working)
+# activity.11826580247 <- rStrava::get_activity_streams(
+#   my_acts
+#   ,stoken
+#   ,id = 11826580247
+#   ,types = NULL # types = NULL will get all columns
+# ) |>
+#   dplyr::mutate(pace_minutes=as.integer(minute(as.duration(1/velocity_smooth)*60*60))
+#                 ,pace_seconds=as.integer(second(as.duration(1/velocity_smooth)*60*60))
+#                 ,pace_mmss_per_km_fmt=sprintf("%02d:%02d", pace_minutes, pace_seconds)
+#                 )
+# class(activity.11924685575) [1] "strframe"   "data.frame" # dim(activity.11826580247) 8281 9
+
+#plot(activity.11826580247$velocity_smooth, type = "l")
+
+# Get speed by splits for a single activity measured by speed/cadence sensor
+# speed.splits.11826580247 <- rStrava::get_spdsplits(
+#   act_id=11826580247
+#   ,stoken
+#   ,units = "metric") # dim(speed.splits.11826580247) 41 3
+
+# Calculate cycling elevation gain and distance per day
+ride.day <- ride %>%
+  dplyr::group_by(start.year.local, start.week.local,start.date.local, start.day.local) %>%
+  dplyr::summarise(distance.km.day= sum(distance.km)
+                   ,elevation.gain.m.day=sum(elevation.gain.m)) # dim(ride.day) 307 6
+
+#---------------------------------------------
+# Create yearly calendar heatmaps using plotly
+#---------------------------------------------
+# Filter data by year from 2020 to current year
+years <- 2020:year(Sys.Date())
+heatmaps <- list()  # Empty list to store plots
+# Create a shared color scale
+color_scale <- list(c(0, 1), c("lightgreen", "red"))
+
+# Loop over the years and create heatmap for each year
+for (year in years) {
+  data_for_year <- ride.day %>% filter(start.year.local == year) # dim(data_for_year) 46 6
+  
+  # Check if data exists for the year
+  if (nrow(data_for_year) == 0) {
+    print(paste("No data for year:", year))
+    next  # Skip this year if there's no data
+  }
+  
+  # Print a small summary of the data for debugging
+  print(paste("Creating plot for year:", year, "with", nrow(data_for_year), "rows"))
+  
+  # Create a heatmap by year and add it to the list
+  name <- paste("plot",year,sep = "_")
+  heatmaps[[name]] <- plotly_build(
+    plot_ly(data = data_for_year
+            ,x= ~start.week.local
+            ,y= ~factor(start.day.local
+                        ,levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+                        )
+            ,z= ~elevation.gain.m.day
+            ,type = "heatmap"
+            ,colors = colorRamp(c("lightgreen", "red")) # color_scale
+            ,colorbar = list(title = "Elevation per day", titleside = "right", len = 0.75)
+            # Disable colorscale
+            ## showlegend=F has no effect as we don't call it a legend, we call it a colorscale, with corresponding showscale attribute
+            ,showscale= FALSE  
+            ) %>%
+      layout(#title = paste("Year",year) # Some plot titles lost when subplot() applies
+             xaxis = list(title = "")
+             ,yaxis = list(title = "")
+             )
+  ) # Close plotly_build()
+}
+
+final_plot <- subplot(heatmaps$plot_2022, heatmaps$plot_2023, heatmaps$plot_2024
+                      ,nrows = 1, shareX = FALSE, shareY = TRUE, margin = 0.05)%>% 
+  layout(annotations = list(
+    list(x = 0.1 , y = 1,  text = "2022", showarrow = FALSE, xref='paper', yref='paper')
+    ,list(x = 0.5 , y = 1, text = "2023", showarrow = FALSE, xref='paper', yref='paper')
+    ,list(x = 0.9 , y = 1, text = "2024", showarrow = FALSE, xref='paper', yref='paper')
+    )
+  ) 
+
+# Get individual plotly plot from the list
+#heatmaps$plot_2020 # no plot created
+#heatmaps$plot_2021 # no plot created
+#heatmaps$plot_2022
+#heatmaps$plot_2023
+#heatmaps$plot_2024
+
+#**********************************************
+# Read data to use under menuItem "Active time" 
+#**********************************************
 
 #------------------
 # Process 2023 data
@@ -337,6 +405,9 @@ activities.2023 <- act_data.1 %>%
 activities.2024 <- act_data.1 %>%
   dplyr::filter(start.year.local==2024) %>%
   dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 218 21
+
+data.moving.time.2024 <- activities.2024 %>%  
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 207 21
 
 #-----------------------------------------------------------
 # Check which shinyapps.io account is used before deployment
