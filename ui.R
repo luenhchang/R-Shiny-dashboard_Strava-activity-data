@@ -42,7 +42,7 @@ sidebar <- shinydashboard::dashboardSidebar(
     ## Reference [shinydashboard: change font size of menuItem in sidebarMenu [duplicate]](https://stackoverflow.com/questions/53559195/shinydashboard-change-font-size-of-menuitem-in-sidebarmenu)
     tags$style(HTML(".sidebar-menu li a { font-size: 20px; }"))
     #,shinydashboard::menuItem(text = "About", tabName = "tabAbout",icon = icon("home",lib = "glyphicon"))
-    ,shinydashboard::menuItem(text = "Moving time", tabName = "tabMovingTime", icon = icon("chart-line"))
+    ,shinydashboard::menuItem(text = "Active Time", tabName = "tabActiveTime", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Swim", tabName = "tabSwim", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Walk", tabName = "tabWalk", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Run", tabName = "tabRun", icon = icon("chart-line"))
@@ -52,12 +52,12 @@ sidebar <- shinydashboard::dashboardSidebar(
 body <- shinydashboard::dashboardBody(
   shinydashboard::tabItems(
     #************************************
-    # menuItem "Moving time"
+    # menuItem "Active Time"
     #************************************
     shinydashboard::tabItem(
-      tabName = "tabMovingTime"
+      tabName = "tabActiveTime"
       ,fluidRow(
-        box(title="Moving time (hours) in 2024"
+        box(title="Active Time (hours) in 2024"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
@@ -65,7 +65,7 @@ body <- shinydashboard::dashboardBody(
         )
       )
       ,fluidRow(
-        box(title="Moving time (hours) in 2023"
+        box(title="Active Time (hours) in 2023"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
