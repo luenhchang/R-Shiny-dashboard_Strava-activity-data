@@ -57,15 +57,16 @@ body <- shinydashboard::dashboardBody(
     shinydashboard::tabItem(
       tabName = "tabActiveTime"
       ,fluidRow(
-        box(title="Active Time (hours) in 2024"
+        box(title="Active hours in 2024"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            ,plotOutput(outputId = "plot.barplot.activity.moving.time.2024")
+            #,plotOutput(outputId = "plot.barplot.activity.moving.time.2024")
+            ,plotly::plotlyOutput(outputId = "plotly.stacked.barplot.activity.moving.time.2024")
         )
       )
       ,fluidRow(
-        box(title="Active Time (hours) in 2023"
+        box(title="Active hours in 2023"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12

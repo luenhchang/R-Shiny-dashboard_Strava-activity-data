@@ -161,6 +161,38 @@ server <- function(input, output, session) {
   #--------------------
   # Moving time in 2024
   #--------------------
+  # Plot moving time in 2024 using ggplot2 as an interactive plot
+  output$plotly.stacked.barplot.activity.moving.time.2024 <- plotly::renderPlotly({
+    data.moving.time.2024 %>% 
+      plotly::plot_ly( x = ~start.date.local
+                       ,y = ~moving.time.hour
+                       ,type = 'bar'
+                       ,name = ~activity.type
+                       ,color = ~activity.type
+                       ,hoverinfo="text"
+                       ,hovertext=paste(
+                         "Activity Name:",data.moving.time.2024$name
+                         ,"<br> Date :", paste0(
+                           format(data.moving.time.2024$start.date.local, format="%B %d")
+                           ," at "
+                           ,lubridate::hour(data.moving.time.2024$start.datetime.local)
+                           ,":"
+                           ,lubridate::minute(data.moving.time.2024$start.datetime.local)
+                           ) # Close paste()
+                         ,"<br> Active hours :", paste(format(round(data.moving.time.2024$moving.time.hour, digits = 2), nsmall=2),"h")
+                         ,"<br> Distance:", paste(
+                           format(round(data.moving.time.2024$distance.km, digits = 2), nsmall=2)
+                           ,"km")
+                         )
+                       ) %>%
+      plotly::layout( xaxis=list(title="Date",titlefont= list(size=40),tickformat="%b")
+                     ,yaxis = list(title = 'Hours',titlefont= list(size=40))
+                     ,barmode = 'stack'
+                     # Left align hover text
+                     ,hoverlabel = list(align = "left"))
+  })
+  
+  # Plot moving time in 2024 using ggplot2 as a static plot
   output$plot.barplot.activity.moving.time.2024 <- shiny::renderPlot({
     
     data.barplot.moving.time <- activities.2024 %>%  
