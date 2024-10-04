@@ -464,6 +464,9 @@ server <- function(input, output, session) {
   #*****************************************
   # Read data to use under menuItem "Ride" 
   #*****************************************
+  #----------------------------------------------------------------------
+  # Yearly cycling elevation gain per weekday by plotly calendar heatmaps
+  #----------------------------------------------------------------------
   output$plotly.calendar.heatmap.yearly.ride.elevation.day <- plotly::renderPlotly({
     years <- 2020:year(Sys.Date())
     heatmaps <- list()  # Empty list to store plots
@@ -546,6 +549,94 @@ server <- function(input, output, session) {
     plotly.calendar.heatmaps.ride.elevation.day.yearly
     
     }) 
+  
+  #----------------------------------------------------------------------
+  # Yearly cycling distance per weekday by plotly calendar heatmaps
+  #----------------------------------------------------------------------
+  output$plotly.calendar.heatmap.yearly.ride.distance.day <- plotly::renderPlotly({
+    years <- 2020:year(Sys.Date())
+    heatmaps.ride.distance <- list()  # Empty list to store plots
+    
+    # Define a purple to yellow color scale
+    # color_scale <- list(
+    #   list(0, "purple"),  # Start of the scale
+    #   list(0.5, "orange"), # Midpoint of the scale
+    #   list(1, "yellow")   # End of the scale
+    # )
+    color_scale <- viridis::viridis(256)  # Generates a color palette from dark blue to yellow
+    
+    # Loop over the years and create heatmap for each year
+    for (year in years) {
+      data_for_year <- ride.day %>% filter(start.year.local == year) # dim(data_for_year) 46 6
+      
+      # Check if data exists for the year
+      if (nrow(data_for_year) == 0) {
+        print(paste("No data for year:", year))
+        next  # Skip this year if there's no data
+      }
+      
+      # Print a small summary of the data for debugging
+      print(paste("Creating plot for year:", year, "with", nrow(data_for_year), "rows"))
+      
+      # Create a heatmap by year and add it to the list
+      name <- paste("plot",year,sep = "_")
+      heatmaps.ride.distance[[name]] <- plotly_build(
+        plot_ly(data = data_for_year
+                ,x= ~start.week.local
+                ,y= ~factor(start.day.local
+                            ,levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+                )
+                ,z= ~distance.km.day
+                ,type = "heatmap"
+                ,colorscale = color_scale  # Shared colorscale across heatmaps
+                ,zmin = 0  # Minimum value for the colorscale
+                ,zmax = 200  # Maximum value for the colorscale (you can adjust based on your data)
+                ,showscale = TRUE  # Show colorbar
+                ,colorbar = list(
+                  len = 1
+                  ,y = 1
+                  ,yanchor = 'top'
+                  ,title = 'Distance'
+                  ,tickvals = seq(0, 200, by = 50)  # Set color scale ticks to 0, 100, 200, ..., 1000
+                  ,ticktext = seq(0, 200, by = 50)  # Optional: Specify tick labels for colorbar
+                )
+        ) %>%
+          layout( xaxis = list(title = "Week", dtick=10) # This has no effect changing title and tick interval
+                  ,yaxis = list(title = ""
+                                ,categoryorder = "array"
+                                ,categoryarray = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+                  )
+          ) # Close layout()
+      ) # Close plotly_build()
+    } # End for loop
+    
+    # Create the subplot with shared colorscale
+    ## heatmaps.ride.distance$plot_2020, heatmaps.ride.distance$plot_2021 are blank probably because of missing data
+    plotly.calendar.heatmaps.ride.distance.day.yearly <- plotly::subplot(
+      heatmaps.ride.distance$plot_2022
+      ,heatmaps.ride.distance$plot_2023
+      ,heatmaps.ride.distance$plot_2024
+      ,nrows = 1
+      ,shareX = FALSE
+      ,shareY = TRUE
+      ,margin = 0.05) %>%
+      plotly::layout(annotations = list(
+        list(x = 0.1, y = 1.075, text = "2022", font = list(size = 20), showarrow = FALSE, xref = 'paper', yref = 'paper')
+        ,list(x = 0.5, y = 1.075, text = "2023", font = list(size = 20), showarrow = FALSE, xref = 'paper', yref = 'paper')
+        ,list(x = 0.9, y = 1.075, text = "2024", font = list(size = 20), showarrow = FALSE, xref = 'paper', yref = 'paper')
+      ) # Close list()
+      ) %>%
+      # Tweak first and second x axes to get a centre title 
+      layout(
+        xaxis = list(title="", titlefont= list(size=20), showgrid=FALSE)
+        ,xaxis2 = list(title="Week", titlefont= list(size=20))
+      )
+    
+    # Return the final plot
+    plotly.calendar.heatmaps.ride.distance.day.yearly
+    
+  }) 
+  
 
 } # Close the server function
 

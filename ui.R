@@ -149,6 +149,7 @@ body <- shinydashboard::dashboardBody(
              ,dataTableOutput(outputId="table.run"))
       ) # Close fluidRow
     ) # Close tabItem
+    
     #************************************
     # menuItem "Ride"
     #************************************
@@ -159,9 +160,18 @@ body <- shinydashboard::dashboardBody(
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            ,plotlyOutput(outputId = "plotly.calendar.heatmap.yearly.ride.elevation.day")
+            ,plotly::plotlyOutput(outputId = "plotly.calendar.heatmap.yearly.ride.elevation.day")
             )
+        ) # Close fluidRow()
+      ,fluidRow(
+        box(title="Cycling distance per weekday"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 12
+            ,plotly::plotlyOutput(outputId = "plotly.calendar.heatmap.yearly.ride.distance.day")
         )
+      ) # Close fluidRow()
+      
       ) # Close tabItem
     
   ) # Close tabItems
