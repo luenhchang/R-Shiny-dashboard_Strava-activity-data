@@ -13,6 +13,7 @@
 ## [Converting UTC time to local standard time in R](https://stackoverflow.com/questions/31325072/converting-utc-time-to-local-standard-time-in-r)
 ## [R - Storing plotly objects inside a list](https://stackoverflow.com/questions/54466628/r-storing-plotly-objects-inside-a-list)
 ## [plotly::sublot not showing both titles](https://stackoverflow.com/questions/68796762/plotlysublot-not-showing-both-titles)
+## [Missing Git tab in Rstudio on Windows computer](https://mikenguyen.netlify.app/post/missing-git-tab-in-rstudio-on-windows-computer/)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
 ## 2024-10
@@ -36,6 +37,7 @@ library(hms)
 library(jsonlite)
 library(pals)
 library(rsconnect)
+library(usethis)
 
 #------------------------------------------------------------------------
 # Directory in local PC
@@ -48,13 +50,8 @@ dir.data <- file.path(dir.app,"data")
 dir.fitness <- file.path(dir.C, "GoogleDrive_MyDrive","Fitness")
 dir.Strava <- file.path(dir.fitness,"Strava")
 dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
-# dir.www <- file.path(dir.app,"www")
-# dir.create(path = dir.www)
-# dir.img <- file.path(dir.www,"image_data-challenges")
-# dir.img.annotated <- file.path(dir.www,"image_data-challenges-annotated") # dir.create(dir.img.annotated)
-# dir.data <- file.path(dir.app,"data")
-# dir.create(dir.data)
 
+setwd(dir.app)
 usethis::use_git()
 
 #------------------------------
