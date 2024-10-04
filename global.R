@@ -16,7 +16,7 @@
 ## [Missing Git tab in Rstudio on Windows computer](https://mikenguyen.netlify.app/post/missing-git-tab-in-rstudio-on-windows-computer/)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
-## 2024-10
+## 2024-10-04 Git pane disappeared when opening this R file. Git pane appearred after on the top right corner change project (none) to RProject_Shinyapp_Strava-activity-data
 ##---------------------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------------------------
@@ -41,7 +41,6 @@ library(usethis)
 
 #------------------------------------------------------------------------
 # Directory in local PC
-## 
 ## www: Where all the images and other assets needed for the viewer
 #------------------------------------------------------------------------
 dir.C <- "C:"
@@ -51,8 +50,7 @@ dir.fitness <- file.path(dir.C, "GoogleDrive_MyDrive","Fitness")
 dir.Strava <- file.path(dir.fitness,"Strava")
 dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
 
-setwd(dir.app)
-usethis::use_git()
+#setwd(dir.app)
 
 #------------------------------
 # Scraping functions (no token)
@@ -319,12 +317,16 @@ ride.day <- ride %>%
 
 #---------------------------------------------
 # Create yearly calendar heatmaps using plotly
+## Multiple heatmaps with 1 shared color scale
 #---------------------------------------------
-# Filter data by year from 2020 to current year
 years <- 2020:year(Sys.Date())
 heatmaps <- list()  # Empty list to store plots
-# Create a shared color scale
-color_scale <- list(c(0, 1), c("lightgreen", "red"))
+
+# Define a shared color scale (explicit color stops from 0 to 1)
+color_scale <- list(
+  list(0, "lightgreen"),  # Start of the scale
+  list(1, "red")          # End of the scale
+)
 
 # Loop over the years and create heatmap for each year
 for (year in years) {
@@ -346,37 +348,39 @@ for (year in years) {
             ,x= ~start.week.local
             ,y= ~factor(start.day.local
                         ,levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-                        )
+            )
             ,z= ~elevation.gain.m.day
             ,type = "heatmap"
-            ,colors = colorRamp(c("lightgreen", "red")) # color_scale
-            ,colorbar = list(title = "Elevation per day", titleside = "right", len = 0.75)
-            # Disable colorscale
-            ## showlegend=F has no effect as we don't call it a legend, we call it a colorscale, with corresponding showscale attribute
-            ,showscale= FALSE  
-            ) %>%
-      layout(#title = paste("Year",year) # Some plot titles lost when subplot() applies
-             xaxis = list(title = "")
-             ,yaxis = list(title = "")
+            ,colorscale = color_scale  # Shared colorscale across heatmaps
+            ,zmin = 0  # Minimum value for the colorscale
+            ,zmax = 1000  # Maximum value for the colorscale (you can adjust based on your data)
+            ,showscale = TRUE  # Show colorbar
+            ,colorbar = list(
+              len = 0.3
+              ,y = 1
+              ,yanchor = 'top'
+              ,title = 'Elevation gain')
+    ) %>%
+      layout(xaxis = list(title = "")
+             ,yaxis = list(title = ""
+                           ,categoryorder = "array"
+                           ,categoryarray = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
              )
+      ) # Close layout()
   ) # Close plotly_build()
 }
 
-final_plot <- subplot(heatmaps$plot_2022, heatmaps$plot_2023, heatmaps$plot_2024
-                      ,nrows = 1, shareX = FALSE, shareY = TRUE, margin = 0.05)%>% 
-  layout(annotations = list(
-    list(x = 0.1 , y = 1,  text = "2022", showarrow = FALSE, xref='paper', yref='paper')
-    ,list(x = 0.5 , y = 1, text = "2023", showarrow = FALSE, xref='paper', yref='paper')
-    ,list(x = 0.9 , y = 1, text = "2024", showarrow = FALSE, xref='paper', yref='paper')
-    )
-  ) 
-
-# Get individual plotly plot from the list
-#heatmaps$plot_2020 # no plot created
-#heatmaps$plot_2021 # no plot created
-#heatmaps$plot_2022
-#heatmaps$plot_2023
-#heatmaps$plot_2024
+# Create the subplot with shared colorscale
+## heatmaps$plot_2020, heatmaps$plot_2021 are blank probably because of missing data
+plotly.calendar.heatmaps.ride.elevation.day.yearly <- subplot(heatmaps$plot_2022, heatmaps$plot_2023, heatmaps$plot_2024,nrows = 1, shareX = FALSE, shareY = TRUE, margin = 0.05
+) %>%
+  layout(
+    annotations = list(
+      list(x = 0.1, y = 1, text = "2022", showarrow = FALSE, xref = 'paper', yref = 'paper'),
+      list(x = 0.5, y = 1, text = "2023", showarrow = FALSE, xref = 'paper', yref = 'paper'),
+      list(x = 0.9, y = 1, text = "2024", showarrow = FALSE, xref = 'paper', yref = 'paper')
+    ) # Close list()
+  ) # Close layout()
 
 #**********************************************
 # Read data to use under menuItem "Active time" 
