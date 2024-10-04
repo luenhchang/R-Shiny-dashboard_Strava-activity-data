@@ -46,6 +46,7 @@ sidebar <- shinydashboard::dashboardSidebar(
     ,shinydashboard::menuItem(text = "Swim", tabName = "tabSwim", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Walk", tabName = "tabWalk", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Run", tabName = "tabRun", icon = icon("chart-line"))
+    ,shinydashboard::menuItem(text = "Ride", tabName = "tabRide", icon = icon("chart-line"))
   ) # Close sidebarMenu()
 )
 
@@ -148,6 +149,20 @@ body <- shinydashboard::dashboardBody(
              ,dataTableOutput(outputId="table.run"))
       ) # Close fluidRow
     ) # Close tabItem
+    #************************************
+    # menuItem "Ride"
+    #************************************
+    ,shinydashboard::tabItem(
+      tabName = "tabRide"
+      ,fluidRow(
+        box(title="Cycling elevation per weekday"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 12
+            ,plotlyOutput(outputId = "plotly.calendar.heatmap.yearly.ride.elevation.day")
+            )
+        )
+      ) # Close tabItem
     
   ) # Close tabItems
 ) # Close dashboardBody()
