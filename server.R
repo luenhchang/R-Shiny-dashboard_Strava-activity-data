@@ -5,6 +5,7 @@
 # Modified from: C:/GoogleDrive/scripts/R-Shinyapp_Strava-activity-data/server.R
 # Reference
 ## [R plotly hover label text alignment](https://stackoverflow.com/questions/50003531/r-plotly-hover-label-text-alignment)
+## [Multiple lines in plotly R not using add_trace](https://stackoverflow.com/questions/69567488/multiple-lines-in-plotly-r-not-using-add-trace)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
 ## 2024-06-04 Added plotly bar plot subplots, one per food category. Currently no control on bar color and subplot titles
@@ -548,7 +549,7 @@ server <- function(input, output, session) {
     # Return the final plot
     plotly.calendar.heatmaps.ride.elevation.day.yearly
     
-    }) 
+    }) # End renderPlotly()
   
   #----------------------------------------------------------------------
   # Yearly cycling distance per weekday by plotly calendar heatmaps
@@ -557,12 +558,7 @@ server <- function(input, output, session) {
     years <- 2020:year(Sys.Date())
     heatmaps.ride.distance <- list()  # Empty list to store plots
     
-    # Define a purple to yellow color scale
-    # color_scale <- list(
-    #   list(0, "purple"),  # Start of the scale
-    #   list(0.5, "orange"), # Midpoint of the scale
-    #   list(1, "yellow")   # End of the scale
-    # )
+    # Define a color scale
     color_scale <- viridis::viridis(256)  # Generates a color palette from dark blue to yellow
     
     # Loop over the years and create heatmap for each year
@@ -634,10 +630,44 @@ server <- function(input, output, session) {
     
     # Return the final plot
     plotly.calendar.heatmaps.ride.distance.day.yearly
-    
-  }) 
+  }) # End renderPlotly()
   
-
+  #-------------------------------------------------------
+  # Plot cumulative cycling distance over start.date.local
+  #-------------------------------------------------------
+  output$plotly.lineplot.yearly.ride.cumulative.distance <- plotly::renderPlotly({
+    lineplot.yearly.ride.cumulative.distance <- plotly::plot_ly(
+      data = ride.day
+      ,type = "scatter"
+      ,mode = "lines+markers"
+      ,x = ~start.dayofyear.local
+      ,y = ~ride.distance.cum.year
+      ,split = ~start.year.local) %>%
+      layout(xaxis = list(title = "Day of year", dtick=30)
+             ,yaxis = list(title = "", tickformat=",")
+             )
+    # Return the final plot
+    lineplot.yearly.ride.cumulative.distance
+  })
+  
+  #-------------------------------------------------------
+  # Plot cumulative cycling elevation gain over start.date.local
+  #-------------------------------------------------------
+  output$plotly.lineplot.yearly.ride.cumulative.elevation <- plotly::renderPlotly({
+    lineplot.yearly.ride.cumulative.elevation <- plotly::plot_ly(
+      data = ride.day
+      ,type = "scatter"
+      ,mode = "lines+markers"
+      ,x = ~start.dayofyear.local
+      ,y = ~ride.elevation.cum.year
+      ,split = ~start.year.local) %>%
+      layout(xaxis = list(title = "Day of year", dtick=30)
+             ,yaxis = list(title = "", tickformat=",")
+      )
+    # Return the final plot
+    lineplot.yearly.ride.cumulative.elevation
+  })
+  
 } # Close the server function
 
 #************************************************************************************************#

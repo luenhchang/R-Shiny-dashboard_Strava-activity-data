@@ -169,8 +169,26 @@ body <- shinydashboard::dashboardBody(
             ,solidHeader = TRUE
             ,width = 12
             ,plotly::plotlyOutput(outputId = "plotly.calendar.heatmap.yearly.ride.distance.day")
-        )
-      ) # Close fluidRow()
+            )
+        ) # Close fluidRow()
+      ,fluidRow(
+        box(title="Cumulative cycling distance"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 6
+            ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.distance")
+            )
+        ) # Close fluidRow()
+      ,fluidRow(
+        box(title="Cumulative cycling elevation gain"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 6
+            ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.elevation")
+            )
+        ) # Close fluidRow()
+      
+      
       
       ) # Close tabItem
     

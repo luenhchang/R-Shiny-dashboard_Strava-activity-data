@@ -283,12 +283,12 @@ act_data.1 <- act_data %>%
 #*****************************************
 # Subset running data
 ride <- act_data.1 |>
-  dplyr::select(id, name, sport_type, start.year.local, start.week.local, start.date.local, start.day.local, distance.km, moving_time, moving.time.hour, elevation.gain.m, average_heartrate, max_heartrate) |>
+  dplyr::select(id, name, sport_type, start.year.local, start.week.local, start.date.local, start.day.local,start.dayofyear.local, distance.km, moving_time, moving.time.hour, elevation.gain.m, average_heartrate, max_heartrate) |>
   dplyr::filter(sport_type=="Ride") |>
   dplyr::mutate(
     # Convert seconds to lubridate duration
     ,moving_time_period=lubridate::seconds_to_period(moving_time)
-    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 321 15
+    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 321 16
 
 # Read single activity (not working)
 # activity.11826580247 <- rStrava::get_activity_streams(
@@ -313,9 +313,14 @@ ride <- act_data.1 |>
 
 # Calculate cycling elevation gain and distance per day
 ride.day <- ride %>%
-  dplyr::group_by(start.year.local, start.week.local,start.date.local, start.day.local) %>%
+  dplyr::group_by(start.year.local, start.week.local,start.dayofyear.local,start.date.local, start.day.local) %>%
   dplyr::summarise(distance.km.day= sum(distance.km)
-                   ,elevation.gain.m.day=sum(elevation.gain.m)) # dim(ride.day) 307 6
+                   ,elevation.gain.m.day=sum(elevation.gain.m)) %>%
+  # Accumulate distance, elevation gain yearly
+  dplyr::group_by(start.year.local) %>%
+  dplyr::arrange(start.date.local) %>%
+  dplyr::mutate(ride.distance.cum.year = cumsum(distance.km.day)
+                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 307 6 9
 
 
 #**********************************************
