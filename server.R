@@ -636,13 +636,19 @@ server <- function(input, output, session) {
   # Plot cumulative cycling distance over start.date.local
   #-------------------------------------------------------
   output$plotly.lineplot.yearly.ride.cumulative.distance <- plotly::renderPlotly({
+    # Create line colors
+    number.years <-length(unique(ride.day$start.year.local))
+    colors.viridis <- viridis::viridis(number.years)
+    
     lineplot.yearly.ride.cumulative.distance <- plotly::plot_ly(
-      data = ride.day
+       data = ride.day
       ,type = "scatter"
       ,mode = "lines+markers"
       ,x = ~start.dayofyear.local
       ,y = ~ride.distance.cum.year
-      ,split = ~start.year.local) %>%
+      ,color = ~factor(start.year.local) # This maps color to each year
+      ,colors = colors.viridis # Use viridis palette
+      ) %>%
       layout(xaxis = list(title = "Day of year", dtick=30)
              ,yaxis = list(title = "", tickformat=",")
              )
@@ -654,13 +660,21 @@ server <- function(input, output, session) {
   # Plot cumulative cycling elevation gain over start.date.local
   #-------------------------------------------------------
   output$plotly.lineplot.yearly.ride.cumulative.elevation <- plotly::renderPlotly({
+    # Create line colors
+    number.years <-length(unique(ride.day$start.year.local))
+    colors.viridis <- viridis::viridis(number.years)
+    # Display colors
+    scales::show_col(colors.viridis)
+
     lineplot.yearly.ride.cumulative.elevation <- plotly::plot_ly(
       data = ride.day
       ,type = "scatter"
       ,mode = "lines+markers"
       ,x = ~start.dayofyear.local
       ,y = ~ride.elevation.cum.year
-      ,split = ~start.year.local) %>%
+      ,color = ~factor(start.year.local) # This maps color to each year
+      ,colors = colors.viridis # Use viridis palette
+      ) %>%
       layout(xaxis = list(title = "Day of year", dtick=30)
              ,yaxis = list(title = "", tickformat=",")
       )

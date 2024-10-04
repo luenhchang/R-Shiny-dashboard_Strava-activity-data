@@ -40,6 +40,7 @@ library(jsonlite)
 library(pals)
 library(rsconnect)
 library(usethis)
+library(viridis)
 
 #------------------------------------------------------------------------
 # Directory in local PC

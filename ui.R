@@ -178,18 +178,13 @@ body <- shinydashboard::dashboardBody(
             ,width = 6
             ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.distance")
             )
+        ,box(title="Cumulative cycling elevation gain"
+             ,status = "primary"
+             ,solidHeader = TRUE
+             ,width = 6
+             ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.elevation")
+             )
         ) # Close fluidRow()
-      ,fluidRow(
-        box(title="Cumulative cycling elevation gain"
-            ,status = "primary"
-            ,solidHeader = TRUE
-            ,width = 6
-            ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.elevation")
-            )
-        ) # Close fluidRow()
-      
-      
-      
       ) # Close tabItem
     
   ) # Close tabItems
