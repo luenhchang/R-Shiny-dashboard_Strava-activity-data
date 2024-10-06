@@ -58,14 +58,28 @@ body <- shinydashboard::dashboardBody(
     shinydashboard::tabItem(
       tabName = "tabActiveTime"
       ,fluidRow(
+         shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2024", width = 2)
+        )
+      ,fluidRow(
         box(title="Active hours in 2024"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
             #,plotOutput(outputId = "plot.barplot.activity.moving.time.2024")
             ,plotly::plotlyOutput(outputId = "plotly.stacked.barplot.activity.moving.time.2024")
+            )
         )
-      )
+      ,fluidRow(
+        shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2023", width = 2)
+        )
       ,fluidRow(
         box(title="Active hours in 2023"
             ,status = "primary"

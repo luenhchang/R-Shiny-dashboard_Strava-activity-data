@@ -73,8 +73,36 @@ server <- function(input, output, session) {
   }# Close function{}
   
   #**********************************************
-  # Outputs to use under menuItem "Moving time"
+  # Outputs to use under menuItem "Active Time"
   #**********************************************
+  
+  #----------------
+  # 2023 valueBoxes
+  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+  #----------------
+  function.renderValueBox(output.id="valueBox.year.in.sport.2023"
+                          ,argument.value=unique(activities.2023$start.year.local)
+                          ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(output.id="valueBox.number.days.active.2023"
+                          ,argument.value=length(unique(activities.2023$start.date.local)) # 275
+                          ,argument.subtitle="Days active")
+  
+  function.renderValueBox(output.id="valueBox.total.moving.hours.2023"
+                          ,argument.value=paste(round(sum(activities.2023$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
+                          ,argument.subtitle="Total active time")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.distance.2023"
+                          ,argument.value=paste(format(round(sum(activities.2023$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling distance")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2023"
+                          ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling elevation gain")
+  
+  #-------------------------------------
+  # 2023 active hours daily using plotly
+  #-------------------------------------
   output$plot.barplot.activity.moving.time.2023 <- shiny::renderPlot({
     
     data.barplot.moving.time <- activities.2023 %>%  
@@ -96,7 +124,10 @@ server <- function(input, output, session) {
                                             ,`Table Tennis`=colors.barplot.moving.time[7]
                                             ,Walk=colors.barplot.moving.time[8]
                                             ,Yoga=colors.barplot.moving.time[9])
-    # Create a bar plot
+    #-------------------------------------------------
+    # 2023 active hours daily using ggplot2
+    ## Backup plot in case plotly plot breaks
+    #-------------------------------------------------
     barplot.daily.moving.time <- ggplot2::ggplot(data.barplot.moving.time
                                                  ,aes(x=start.date.local
                                                       ,y=moving.time.hour
@@ -159,9 +190,33 @@ server <- function(input, output, session) {
     return(barplot.daily.moving.time)
   }) # Close renderPlot()
   
-  #--------------------
-  # Moving time in 2024
-  #--------------------
+  #----------------
+  # 2024 valueBoxes
+  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+  #----------------
+  function.renderValueBox(output.id="valueBox.year.in.sport.2024"
+                          ,argument.value=unique(activities.2024$start.year.local)
+                          ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(output.id="valueBox.number.days.active.2024"
+                          ,argument.value=length(unique(activities.2024$start.date.local)) # 275
+                          ,argument.subtitle="Days active")
+  
+  function.renderValueBox(output.id="valueBox.total.moving.hours.2024"
+                          ,argument.value=paste(round(sum(activities.2024$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
+                          ,argument.subtitle="Total active time")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.distance.2024"
+                          ,argument.value=paste(format(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling distance")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2024"
+                          ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling elevation gain")
+  
+  #--------------------------------------
+  # 2024 active hours daily using plotly
+  #--------------------------------------
   # Plot moving time in 2024 using ggplot2 as an interactive plot
   output$plotly.stacked.barplot.activity.moving.time.2024 <- plotly::renderPlotly({
     data.moving.time.2024 %>% 
