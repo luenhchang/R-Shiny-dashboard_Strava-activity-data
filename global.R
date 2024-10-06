@@ -271,20 +271,20 @@ act_data.1 <- act_data %>%
     ,start.year.local=lubridate::year(start.datetime.local)
     ,start.dayofyear.local=lubridate::yday(start.datetime.local)
     ,start.month.local=lubridate::month(start.datetime.local)
-    ,start.day.local=weekdays(as.Date(start.datetime.local))
+    ,start.weekday.local=weekdays(as.Date(start.datetime.local))
     ,start.week.local=lubridate::week(as.Date(start.datetime.local))
     ,distance.km=distance
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
     ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 922 22
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 924 22
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
 #*****************************************
 # Subset running data
 ride <- act_data.1 |>
-  dplyr::select(id, name, sport_type, start.year.local, start.week.local, start.date.local, start.day.local,start.dayofyear.local, distance.km, moving_time, moving.time.hour, elevation.gain.m, average_heartrate, max_heartrate) |>
+  dplyr::select(id, name, sport_type, start.year.local, start.week.local, start.date.local, start.weekday.local,start.dayofyear.local, distance.km, moving_time, moving.time.hour, elevation.gain.m, average_heartrate, max_heartrate) |>
   dplyr::filter(sport_type=="Ride") |>
   dplyr::mutate(
     # Convert seconds to lubridate duration
@@ -314,22 +314,72 @@ ride <- act_data.1 |>
 
 # Calculate cycling elevation gain and distance per day
 ride.day <- ride %>%
-  dplyr::group_by(start.year.local, start.week.local,start.dayofyear.local,start.date.local, start.day.local) %>%
+  dplyr::group_by(start.year.local, start.week.local,start.dayofyear.local,start.date.local, start.weekday.local) %>%
   dplyr::summarise(distance.km.day= sum(distance.km)
                    ,elevation.gain.m.day=sum(elevation.gain.m)) %>%
   # Accumulate distance, elevation gain yearly
   dplyr::group_by(start.year.local) %>%
   dplyr::arrange(start.date.local) %>%
   dplyr::mutate(ride.distance.cum.year = cumsum(distance.km.day)
-                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 307 6 9
+                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 307 9
 
+# Calculate total ride distance, elevation per weekday, year
+ride.weekday.year <- ride %>%
+  # Collapse cycling data to 1 record per weekday (e.g., Monday, Tuesday,...) and year
+  dplyr::group_by(start.year.local, start.weekday.local) %>%
+  dplyr::summarise(count.ride=dplyr::n()
+                   ,total.ride.distance.dayOfWeek= round(sum(distance.km), digits = 2)
+                   ,total.ride.elevation.dayOfWeek=round(sum(elevation.gain.m), digits = 2)
+                   ) # dim(ride.weekday.year) 31 5
+
+#-----------------------------------------------------
+# Find weekday with greatest number of rides in a year
+#-----------------------------------------------------
+ride.year.highest.ride.count.weekday <- ride.weekday.year %>%
+  # Collapse cycling data to 1 record per year
+  dplyr::group_by(start.year.local) %>%
+  dplyr::filter(count.ride==max(count.ride)) %>%
+  # Customise text following infobox title "The most active weekday in"
+  dplyr::mutate(infobox.value = paste0(start.year.local, " : ", start.weekday.local, 
+                                       " (", count.ride, " rides)")) # dim(ride.year.highest.ride.count.weekday) 5 6 # ride.year.highest.ride.count.weekday$infobox.value
+
+# Collapse all values into a single string with <br/> for line breaks
+infobox.value.yearly.weekday.highest.ride.number <- HTML(paste(ride.year.highest.ride.count.weekday$infobox.value, collapse = "<br/>"))
+
+#-----------------------------------------------------
+# Find weekday with longest cycling distance in a year
+#-----------------------------------------------------
+ride.year.longest.ride.distance.weekday <- ride.weekday.year %>%
+  # Collapse cycling data to 1 record per year
+  dplyr::group_by(start.year.local) %>%
+  dplyr::filter(total.ride.distance.dayOfWeek==max(total.ride.distance.dayOfWeek)) %>%
+  # Customise text following infobox title "The most active weekday in"
+  dplyr::mutate(infobox.value = paste0(start.year.local, " : ", start.weekday.local, 
+                                       " (", total.ride.distance.dayOfWeek, " km)")) # dim(ride.year.longest.ride.distance.weekday) 5 6
+
+# Collapse all values into a single string with <br/> for line breaks
+infobox.value.yearly.weekday.longest.ride.distance <- HTML(paste(ride.year.longest.ride.distance.weekday$infobox.value, collapse = "<br/>"))
+
+#--------------------------------------------------------
+# Find weekday with best cycling elevation gain in a year
+#--------------------------------------------------------
+ride.year.greatest.ride.elevation.weekday <- ride.weekday.year %>%
+  # Collapse cycling data to 1 record per year
+  dplyr::group_by(start.year.local) %>% 
+  dplyr::filter(total.ride.elevation.dayOfWeek==max(total.ride.elevation.dayOfWeek)) %>%
+  # Customise text following infobox title "The most active weekday in"
+  dplyr::mutate(infobox.value = paste0(start.year.local, " : ", start.weekday.local, 
+                                       " (", total.ride.elevation.dayOfWeek, " m)")) # dim(ride.year.greatest.ride.elevation.weekday) 5 6
+
+# Collapse all values into a single string with <br/> for line breaks
+infobox.value.yearly.weekday.greatest.ride.elevation <- HTML(paste(ride.year.greatest.ride.elevation.weekday$infobox.value, collapse = "<br/>"))
 
 #**********************************************
 # Read data to use under menuItem "Active time" 
 #**********************************************
 
 #------------------
-# Process 2023 data
+# Process 2023 data 
 #------------------
 activities.2023 <- act_data.1 %>%
   dplyr::filter(start.year.local==2023) %>%
@@ -340,7 +390,7 @@ activities.2023 <- act_data.1 %>%
     ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("strength & stability workout")
     ,grepl(pattern="bike fitting", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("bike fitting")
     ,TRUE ~ sport_type )
-    ) # dim(activities.2023) 404 21
+    ) # dim(activities.2023) 404 23
 
 #------------------
 # Process 2024 data

@@ -56,9 +56,10 @@ server <- function(input, output, session) {
   } # Close function{}
   
   # Define function for renderInfoBox()
+  ## Default icon set to trophy
   function.renderInfoBox <- function(output.id, arg.title, arg.value, arg.icon, arg.color, arg.fill){
     # Write default values to optional arguments
-    if(missing(arg.icon)){arg.icon<-"list"}
+    if(missing(arg.icon)){arg.icon<-"trophy"}
     if(missing(arg.color)){arg.color<-"olive"}
     if(missing(arg.fill)){arg.fill <- TRUE}
 
@@ -66,7 +67,7 @@ server <- function(input, output, session) {
       shinydashboard::infoBox(
         title = arg.title
         ,value = arg.value
-        #,icon=icon(arg.icon)
+        ,icon=icon(arg.icon)
         ,color = arg.color
         ,fill = arg.fill)
     }) # Close renderInfoBox()
@@ -91,14 +92,6 @@ server <- function(input, output, session) {
   function.renderValueBox(output.id="valueBox.total.moving.hours.2023"
                           ,argument.value=paste(round(sum(activities.2023$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
-  
-  function.renderValueBox(output.id="valueBox.total.cycling.distance.2023"
-                          ,argument.value=paste(format(round(sum(activities.2023$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
-                          ,argument.subtitle="Total cycling distance")
-  
-  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2023"
-                          ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
-                          ,argument.subtitle="Total cycling elevation gain")
   
   #-------------------------------------
   # 2023 active hours daily using plotly
@@ -520,6 +513,38 @@ server <- function(input, output, session) {
   #*****************************************
   # Read data to use under menuItem "Ride" 
   #*****************************************
+  
+  #----------------
+  # 2023 valueBoxes
+  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+  #----------------
+  function.renderValueBox(output.id="valueBox.ride.year.in.sport.2023"
+                          ,argument.value=unique(activities.2023$start.year.local)
+                          ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.distance.2023"
+                          ,argument.value=paste(format(round(sum(activities.2023$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling distance")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2023"
+                          ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling elevation gain")
+  
+  #----------------
+  # 2024 valueBoxes
+  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+  #----------------
+  function.renderValueBox(output.id="valueBox.ride.year.in.sport.2024"
+                          ,argument.value=unique(activities.2024$start.year.local)
+                          ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.distance.2024"
+                          ,argument.value=paste(format(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling distance")
+  
+  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2024"
+                          ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling elevation gain")
   #----------------------------------------------------------------------
   # Yearly cycling elevation gain per weekday by plotly calendar heatmaps
   #----------------------------------------------------------------------
@@ -552,7 +577,7 @@ server <- function(input, output, session) {
       heatmaps[[name]] <- plotly_build(
         plot_ly(data = data_for_year
                 ,x= ~start.week.local
-                ,y= ~factor(start.day.local
+                ,y= ~factor(start.weekday.local
                             ,levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
                 )
                 ,z= ~elevation.gain.m.day
@@ -634,7 +659,7 @@ server <- function(input, output, session) {
       heatmaps.ride.distance[[name]] <- plotly_build(
         plot_ly(data = data_for_year
                 ,x= ~start.week.local
-                ,y= ~factor(start.day.local
+                ,y= ~factor(start.weekday.local
                             ,levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
                 )
                 ,z= ~distance.km.day
@@ -737,6 +762,22 @@ server <- function(input, output, session) {
     lineplot.yearly.ride.cumulative.elevation
   })
   
+  #----------------------------
+  # InfoBoxes
+  #----------------------------
+  function.renderInfoBox(output.id = "infoBox.yearly.weekday.greatest.total.ride.number"
+                         ,arg.title="Most active weekday in"
+                         ,arg.value=infobox.value.yearly.weekday.highest.ride.number
+                         ,arg.icon = "chart-bar")
+  function.renderInfoBox(output.id = "infoBox.yearly.weekday.longest.total.ride.distance"
+                         ,arg.title="Most distance-productive weekday in"
+                         ,arg.value=infobox.value.yearly.weekday.longest.ride.distance
+                         ,arg.icon = "map")
+  function.renderInfoBox(output.id = "infoBox.yearly.weekday.best.total.ride.elevation"
+                         ,arg.title = "Most elevation-productive weekday in"
+                         ,arg.value = infobox.value.yearly.weekday.greatest.ride.elevation
+                         ,arg.icon = "arrow-up")
+
 } # Close the server function
 
 #************************************************************************************************#

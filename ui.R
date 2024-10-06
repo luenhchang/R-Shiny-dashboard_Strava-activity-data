@@ -61,24 +61,19 @@ body <- shinydashboard::dashboardBody(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2024", width = 2)
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2024", width = 2)
         )
       ,fluidRow(
         box(title="Active hours in 2024"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            #,plotOutput(outputId = "plot.barplot.activity.moving.time.2024")
             ,plotly::plotlyOutput(outputId = "plotly.stacked.barplot.activity.moving.time.2024")
             )
         )
       ,fluidRow(
-        shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2023", width = 2)
+         shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2023", width = 2)
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2023", width = 2)
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2023", width = 2)
         )
       ,fluidRow(
         box(title="Active hours in 2023"
@@ -94,29 +89,22 @@ body <- shinydashboard::dashboardBody(
     #************************************
     ,shinydashboard::tabItem(
       tabName = "tabSwim"
-      # ,fluidRow(
-      #   # valueBox 1 to 5
-      #    shinydashboard::valueBoxOutput(outputId = "valueBox.num.unique.food.barcodes", width = 2)
-      #   ,shinydashboard::valueBoxOutput(outputId = "valueBox.num.food.category", width = 2)
-      #   ,shinydashboard::valueBoxOutput(outputId = "valueBox.num.food.no.category", width = 2)
-      #   ,shinydashboard::valueBoxOutput(outputId = "valueBox.num.food.expired", width = 2)
-      #   ,shinydashboard::valueBoxOutput(outputId = "valueBox.summed.price.food", width = 3)
-      #   ) # Close fluidRow
       ,fluidRow(
         box(title="Pool swimming pace over distance"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            ,plotlyOutput(outputId = "plotly.bubble.plot.swim.pace.distance"
-                        ))
-      )
+            ,plotlyOutput(outputId = "plotly.bubble.plot.swim.pace.distance")
+            )
+        )
       ,fluidRow(
         box(title = "Pool swimming data"
              ,status = "primary"
              ,solidHeader = TRUE
              ,collapsible = TRUE
              ,width = 12
-             ,dataTableOutput(outputId="table.poolswim"))
+             ,dataTableOutput(outputId="table.poolswim")
+            )
         ) # Close fluidRow
     ) # Close tabItem
     #************************************
@@ -170,6 +158,16 @@ body <- shinydashboard::dashboardBody(
     ,shinydashboard::tabItem(
       tabName = "tabRide"
       ,fluidRow(
+         shinydashboard::valueBoxOutput(outputId = "valueBox.ride.year.in.sport.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2024", width = 2)
+        )
+      ,fluidRow(
+         shinydashboard::valueBoxOutput(outputId = "valueBox.ride.year.in.sport.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2023", width = 2)
+        )
+      ,fluidRow(
         box(title="Cycling elevation per weekday"
             ,status = "primary"
             ,solidHeader = TRUE
@@ -199,8 +197,12 @@ body <- shinydashboard::dashboardBody(
              ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.elevation")
              )
         ) # Close fluidRow()
+      ,fluidRow(
+        shinydashboard::valueBoxOutput(outputId = "infoBox.yearly.weekday.greatest.total.ride.number", width = 4)
+        ,shinydashboard::valueBoxOutput(outputId = "infoBox.yearly.weekday.longest.total.ride.distance", width = 4)
+        ,shinydashboard::valueBoxOutput(outputId = "infoBox.yearly.weekday.best.total.ride.elevation",width = 4)
+        ) # Close fluidRow()
       ) # Close tabItem
-    
   ) # Close tabItems
 ) # Close dashboardBody()
 
