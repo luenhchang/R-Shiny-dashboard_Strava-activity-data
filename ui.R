@@ -61,7 +61,7 @@ body <- shinydashboard::dashboardBody(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
-        )
+        ) # End fluidRow()
       ,fluidRow(
         box(title="Active hours in 2024"
             ,status = "primary"
@@ -69,21 +69,30 @@ body <- shinydashboard::dashboardBody(
             ,width = 12
             ,plotly::plotlyOutput(outputId = "plotly.stacked.barplot.activity.moving.time.2024")
             )
-        )
+        ) # End fluidRow()
       ,fluidRow(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2023", width = 2)
-        )
+        ) # End fluidRow()
       ,fluidRow(
         box(title="Active hours in 2023"
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            ,plotOutput(outputId = "plot.barplot.activity.moving.time.2023")
+            ,shiny::plotOutput(outputId = "plot.barplot.activity.moving.time.2023")
             )
-        )
-      )
+        ) # End fluidRow()
+      ,fluidRow(
+        box(title = "Active hours"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 12
+            ,DT::dataTableOutput(outputId = "dataTable.activity.moving.time")
+            )
+        ) # End fluidRow()
+      ) # tabItem()
+    
     #************************************
     # menuItem "Swim"
     #************************************
@@ -196,6 +205,14 @@ body <- shinydashboard::dashboardBody(
              ,width = 6
              ,plotly::plotlyOutput(outputId = "plotly.lineplot.yearly.ride.cumulative.elevation")
              )
+        ) # Close fluidRow()
+      ,fluidRow(
+        box(title="Cumulative total of ride distance and elevation gain aggregated by day"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 12
+            ,DT::dataTableOutput(outputId = "dataTable.cumulative.total.ride.distance.elevation.aggregated.by.day")
+            )
         ) # Close fluidRow()
       ,fluidRow(
         shinydashboard::valueBoxOutput(outputId = "infoBox.yearly.weekday.greatest.total.ride.number", width = 4)

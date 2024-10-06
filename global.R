@@ -17,6 +17,7 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-10-06 Deployed app
 ## 2024-10-04 Git pane disappeared when opening this R file. Git pane appearred after on the top right corner change project (none) to RProject_Shinyapp_Strava-activity-data
 ##---------------------------------------------------------------------------------------------------------
 
@@ -316,12 +317,16 @@ ride <- act_data.1 |>
 ride.day <- ride %>%
   dplyr::group_by(start.year.local, start.week.local,start.dayofyear.local,start.date.local, start.weekday.local) %>%
   dplyr::summarise(distance.km.day= sum(distance.km)
-                   ,elevation.gain.m.day=sum(elevation.gain.m)) %>%
+                   ,elevation.gain.m.day=sum(elevation.gain.m)
+                   # Combine multiple activities a day to a string with events separated by comma
+                   ,activity.name.day=paste(name, collapse = ", ")
+                   ,num.ride.day=dplyr::n()
+                   ) %>%
   # Accumulate distance, elevation gain yearly
   dplyr::group_by(start.year.local) %>%
   dplyr::arrange(start.date.local) %>%
   dplyr::mutate(ride.distance.cum.year = cumsum(distance.km.day)
-                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 307 9
+                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 307 11
 
 # Calculate total ride distance, elevation per weekday, year
 ride.weekday.year <- ride %>%

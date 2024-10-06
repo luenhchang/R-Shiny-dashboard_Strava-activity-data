@@ -94,7 +94,7 @@ server <- function(input, output, session) {
                           ,argument.subtitle="Total active time")
   
   #-------------------------------------
-  # 2023 active hours daily using plotly
+  # 2023 active hours daily using ggplot2
   #-------------------------------------
   output$plot.barplot.activity.moving.time.2023 <- shiny::renderPlot({
     
@@ -117,10 +117,7 @@ server <- function(input, output, session) {
                                             ,`Table Tennis`=colors.barplot.moving.time[7]
                                             ,Walk=colors.barplot.moving.time[8]
                                             ,Yoga=colors.barplot.moving.time[9])
-    #-------------------------------------------------
-    # 2023 active hours daily using ggplot2
-    ## Backup plot in case plotly plot breaks
-    #-------------------------------------------------
+    
     barplot.daily.moving.time <- ggplot2::ggplot(data.barplot.moving.time
                                                  ,aes(x=start.date.local
                                                       ,y=moving.time.hour
@@ -322,6 +319,27 @@ server <- function(input, output, session) {
     return(barplot.daily.moving.time)
   }) # Close renderPlot()
   
+  #---------------------------------
+  # DT Table with daily active hours
+  #---------------------------------
+  output$dataTable.activity.moving.time <- DT::renderDataTable({
+    act_data.2 <- act_data.1 %>% 
+      dplyr::select(start.date.local, name, sport_type, moving.time.hour, average_heartrate, max_heartrate) %>%
+      dplyr::mutate(moving.time.hour=round(moving.time.hour, digits = 2)) %>%
+      dplyr::rename(Date=start.date.local
+                    ,Activity=name
+                    ,`Sport type`=sport_type
+                    ,`Active time`=moving.time.hour
+                    ,`Averaged heart rate`= average_heartrate
+                    ,`Max heart rate`=max_heartrate) # dim(act_data.2) 924 6
+    
+    # Left-align character columns, right-align numeric columns
+    DT::datatable(act_data.2) %>%
+      DT::formatStyle(
+         columns = names(act_data.2)
+        ,textAlign= styleInterval(0, c("left","right"))
+      )
+  })
   
   #*****************************************
   # Outputs to use under menuItem "Swim"
@@ -762,6 +780,44 @@ server <- function(input, output, session) {
     lineplot.yearly.ride.cumulative.elevation
   })
   
+  #-------------------------------------------------------------------------------------
+  # DT Table with Cumulative total of ride distance and elevation gain aggregated by day
+  #-------------------------------------------------------------------------------------
+  output$dataTable.cumulative.total.ride.distance.elevation.aggregated.by.day <- DT::renderDataTable({
+    ride.day.1 <- ride.day %>%
+      dplyr::ungroup()%>%
+      dplyr::mutate(start.date.local.start.weekday.local= paste(start.date.local, start.weekday.local)
+                    ,distance.km.day=round(distance.km.day, digits = 2)
+                    ,elevation.gain.m.day=format(round(elevation.gain.m.day, digits = 0), big.mark=",")
+                    ,ride.distance.cum.year=format(round(ride.distance.cum.year, digits = 2), big.mark=",")
+                    ,ride.elevation.cum.year=format(round(ride.elevation.cum.year, digits = 0), big.mark=",")
+                    ) %>%
+      dplyr::select(start.date.local.start.weekday.local
+                    ,start.dayofyear.local
+                    ,activity.name.day
+                    ,distance.km.day
+                    ,ride.distance.cum.year
+                    ,elevation.gain.m.day
+                    ,ride.elevation.cum.year) %>%
+      dplyr::rename( Date=start.date.local.start.weekday.local
+                     ,`Day of year`=start.dayofyear.local
+                     ,Activities=activity.name.day
+                     ,Distance=distance.km.day
+                     ,`Cumulative distance`=ride.distance.cum.year
+                     ,`Elevation gain`=elevation.gain.m.day
+                     ,`Cumulative elevation`=ride.elevation.cum.year)
+    
+    datatable(ride.day.1) %>%
+      DT::formatStyle(
+        columns = names(ride.day.1) # Apply to all columns
+        # Use styleInterval to set alignment
+        ,textAlign = styleInterval(0 # 0 represents the threshold value
+                                   , c("left", "right") #values less than or equal to 0 will be left-aligned, and values greater than 0 will be right-aligned.
+                                   ) 
+        , backgroundColor = styleEqual(0, "transparent")  # Optional: keeps background transparent
+      )
+    
+  })
   #----------------------------
   # InfoBoxes
   #----------------------------
