@@ -201,7 +201,7 @@ server <- function(input, output, session) {
                           ,argument.subtitle="Total cycling distance")
   
   function.renderValueBox(output.id="valueBox.total.cycling.elevation.2024"
-                          ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   
   #--------------------------------------
@@ -545,7 +545,7 @@ server <- function(input, output, session) {
                           ,argument.subtitle="Total cycling distance")
   
   function.renderValueBox(output.id="valueBox.total.cycling.elevation.2023"
-                          ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   
   #----------------
