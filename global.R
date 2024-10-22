@@ -4,7 +4,7 @@
 # Date created: 01-OCT-2024
 # Author(s): Lun-Hsien Chang
 # Input: 
-# Output: 
+# Output: https://luenhchang.shinyapps.io/Strava-activity-data/  
 # References
 ## [How to Scrape and Store Strava Data Using R](https://rviews.rstudio.com/2021/11/22/strava-data/)
 ## [rStrava](https://fawda123.github.io/rStrava/)
