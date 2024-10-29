@@ -17,6 +17,8 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-10-29 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
+## 2024-10-22 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-06 Deployed app
 ## 2024-10-04 Git pane disappeared when opening this R file. Git pane appearred after on the top right corner change project (none) to RProject_Shinyapp_Strava-activity-data
 ##---------------------------------------------------------------------------------------------------------
@@ -402,10 +404,11 @@ activities.2023 <- act_data.1 %>%
 #------------------
 activities.2024 <- act_data.1 %>%
   dplyr::filter(start.year.local==2024) %>%
-  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 218 21
+  dplyr::arrange(start.datetime.local) %>%
+  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 231 23
 
 data.moving.time.2024 <- activities.2024 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 207 21
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 217 24
 
 #-----------------------------------------------------------
 # Check which shinyapps.io account is used before deployment
