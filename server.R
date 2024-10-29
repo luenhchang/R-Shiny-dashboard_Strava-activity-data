@@ -6,6 +6,7 @@
 # Reference
 ## [R plotly hover label text alignment](https://stackoverflow.com/questions/50003531/r-plotly-hover-label-text-alignment)
 ## [Multiple lines in plotly R not using add_trace](https://stackoverflow.com/questions/69567488/multiple-lines-in-plotly-r-not-using-add-trace)
+## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
 ## 2024-06-04 Added plotly bar plot subplots, one per food category. Currently no control on bar color and subplot titles
@@ -20,6 +21,9 @@
 # Color
 color.global.infoBox <- "olive"
 color.global.valueBox <- "orange"
+
+marker_style <- list(line = list(width = 0.5,
+                                 color = 'rgb(0, 0, 0)'))
 
 server <- function(input, output, session) {
   
@@ -207,7 +211,7 @@ server <- function(input, output, session) {
   #--------------------------------------
   # 2024 active hours daily using plotly
   #--------------------------------------
-  # Plot moving time in 2024 using ggplot2 as an interactive plot
+  # Plot moving time in 2024 using plotly as an interactive plot
   output$plotly.stacked.barplot.activity.moving.time.2024 <- plotly::renderPlotly({
     data.moving.time.2024 %>% 
       plotly::plot_ly( x = ~start.date.local
@@ -215,6 +219,7 @@ server <- function(input, output, session) {
                        ,type = 'bar'
                        ,name = ~activity.type
                        ,color = ~activity.type
+                       ,marker= marker_style
                        ,hoverinfo="text"
                        ,hovertext=paste(
                          "Activity Name:",data.moving.time.2024$name
