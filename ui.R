@@ -60,6 +60,7 @@ body <- shinydashboard::dashboardBody(
       ,fluidRow(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
         ) # End fluidRow()
       ,fluidRow(
@@ -73,6 +74,7 @@ body <- shinydashboard::dashboardBody(
       ,fluidRow(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2023", width = 2)
         ) # End fluidRow()
       ,fluidRow(

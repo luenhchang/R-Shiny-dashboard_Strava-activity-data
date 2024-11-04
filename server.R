@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-11-04 Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.
 ## 2024-06-04 Added plotly bar plot subplots, one per food category. Currently no control on bar color and subplot titles
 ## 2024-05-16 Commented out shiny::renderUI({rmarkdown::render() shiny::includeHTML('menuItem-Fitness.html') }). Now includeHTML() is used to read a html file, which was knitted as html_fragment in .Rmd files
 ## 2024-05-07 Added a linebreak in renderDataTable with 2 steps: (1) add <br> as linebreak symbol, (2) set datatable(escape=FALSE)
@@ -25,6 +26,30 @@ color.global.valueBox <- "orange"
 marker_style <- list(line = list(width = 0.5,
                                  color = 'rgb(0, 0, 0)'))
 
+# Function to get the number of days in a given year
+days_in_year <- function(year) {
+  if (leap_year(year)) {
+    return(366)
+  } else {
+    return(365)
+  }
+}
+
+# Get the current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
+# Function to check if a year is the current year
+is_current_year <- function(year) {
+  return(year == current_year)
+}
+
+# Example usage
+#is_current_year(2024)  # Returns TRUE if the current year is 2024
+#is_current_year(2023)  # Returns FALSE if the current year is not 2023
+
+#-------
+# Server
+#-------
 server <- function(input, output, session) {
   
   # Stop running shiny app when closing browser window
@@ -92,6 +117,13 @@ server <- function(input, output, session) {
   function.renderValueBox(output.id="valueBox.number.days.active.2023"
                           ,argument.value=length(unique(activities.2023$start.date.local)) # 275
                           ,argument.subtitle="Days active")
+  
+  # Calculate % of days in 2023 that were active 
+  proportion.days.active.2023 <- round(length(unique(activities.2023$start.date.local))/days_in_year(unique(activities.2023$start.year.local))*100, digits = 2)
+  
+  function.renderValueBox(output.id="valueBox.proportion.days.active.2023"
+                          ,argument.value=proportion.days.active.2023 # 75.34
+                          ,argument.subtitle="% days active")
   
   function.renderValueBox(output.id="valueBox.total.moving.hours.2023"
                           ,argument.value=paste(round(sum(activities.2023$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
@@ -195,6 +227,20 @@ server <- function(input, output, session) {
   function.renderValueBox(output.id="valueBox.number.days.active.2024"
                           ,argument.value=length(unique(activities.2024$start.date.local)) # 275
                           ,argument.subtitle="Days active")
+  
+  # Calculate proportion of days that were active considering the year is a current year or not
+  proportion.days.active.2024 <-  ifelse(
+    # Check if the year is a current year
+    is_current_year(unique(activities.2024$start.year.local))==TRUE
+    # Calculate proportion of days active for a current year
+    ,length(unique(activities.2024$start.date.local))/max(activities.2024$start.date.local.day.of.year)*100
+    # Calculate proportion of days active for a past year
+    ,length(unique(activities.2024$start.date.local))/days_in_year(unique(activities.2024$start.year.local))*100)
+  
+  function.renderValueBox(output.id="valueBox.proportion.days.active.2024"
+                          ,argument.value=round(proportion.days.active.2024, digits = 2) # 57.77
+                          ,argument.subtitle="% days active")
+  
   
   function.renderValueBox(output.id="valueBox.total.moving.hours.2024"
                           ,argument.value=paste(round(sum(activities.2024$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275

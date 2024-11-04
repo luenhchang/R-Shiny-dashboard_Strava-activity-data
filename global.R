@@ -271,6 +271,8 @@ act_data.1 <- act_data %>%
       ,TRUE ~ format(start.datetime.UTC, tz="Australia/Brisbane",usetz=TRUE)
       )
     ,start.date.local=lubridate::date(start.datetime.local)
+    # get the day of the year (e.g. Returns 1 for 1st Jan, Returns 366 for 31st Dec in a leap year)
+    ,start.date.local.day.of.year=lubridate::yday(start.date.local)
     ,start.year.local=lubridate::year(start.datetime.local)
     ,start.dayofyear.local=lubridate::yday(start.datetime.local)
     ,start.month.local=lubridate::month(start.datetime.local)
@@ -280,7 +282,7 @@ act_data.1 <- act_data %>%
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
     ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 924 22
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 930 23
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
@@ -397,7 +399,7 @@ activities.2023 <- act_data.1 %>%
     ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("strength & stability workout")
     ,grepl(pattern="bike fitting", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("bike fitting")
     ,TRUE ~ sport_type )
-    ) # dim(activities.2023) 404 23
+    ) # dim(activities.2023) 404 24
 
 #------------------
 # Process 2024 data
@@ -405,10 +407,10 @@ activities.2023 <- act_data.1 %>%
 activities.2024 <- act_data.1 %>%
   dplyr::filter(start.year.local==2024) %>%
   dplyr::arrange(start.datetime.local) %>%
-  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 231 23
+  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 226 24
 
 data.moving.time.2024 <- activities.2024 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 217 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 212 24
 
 #-----------------------------------------------------------
 # Check which shinyapps.io account is used before deployment
