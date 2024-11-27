@@ -17,6 +17,7 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-11-27 Moved shinyapps.io account checking to check_shinyapps_io_ accounts.R
 ## 2024-11-27 Moved Strava credentials to Strava_API_credentials.R
 ## 2024-11-04 Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-29 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
@@ -400,27 +401,6 @@ activities.2024 <- act_data.1 %>%
 data.moving.time.2024 <- activities.2024 %>%  
   dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 212 24
 
-#-----------------------------------------------------------
-# Check which shinyapps.io account is used before deployment
-#-----------------------------------------------------------
-#rsconnect::accountInfo()
-# $name
-# [1] "luenhchang"
-# 
-# $server
-# [1] "shinyapps.io"
-# 
-# $accountId
-# [1] "981190"
-# 
-# $token
-# [1] "A9C5D75F89CEC1B84E8F1CCFEEBB5CF1"
-# 
-# $secret
-# [1] "W10qQN... (redacted)"
-# 
-# $username
-# [1] "luenhchang"
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
 #************************************************************************************************#
