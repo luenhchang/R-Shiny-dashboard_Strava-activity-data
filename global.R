@@ -17,6 +17,7 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-11-27 Moved Strava credentials to Strava_API_credentials.R
 ## 2024-11-04 Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-29 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-22 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
@@ -68,20 +69,6 @@ dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
 #--------------------------------
 # Read data from Strava using API 
 #--------------------------------
-# app_name <- 'ActivityTracker' # chosen by user
-# app_client_id  <- '130546' # an integer, assigned by Strava
-# app_secret <- '64ebf8746e6a8c0132dc63298cc74f7efb0207d4' # an alphanumeric secret, assigned by Strava
-
-# Give Strava authentication. Create the authentication token file
-## This step creates files .httr-oauth and .gitignore after the authentication is completed
-## Authentication complete. Please close this page and return to R.
-# stoken <- httr::config(token = rStrava::strava_oauth(
-#   app_name=app_name
-#   ,app_client_id=app_client_id
-#   ,app_secret=app_secret
-#   ,app_scope="activity:read_all"
-#   ,cache = TRUE # Setting cache = TRUE for strava_oauth will create an authentication file .httr-oauth in the working directory
-#   ))
 
 # Read authentication file .httr-oauth from the app folder
 #setwd(dir.app)
