@@ -17,7 +17,7 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
-## 2024-11-27 Moved shinyapps.io account checking to check_shinyapps_io_ accounts.R
+## 2024-11-27 Moved shinyapps.io account checking to check_shinyapps_io_accounts.R
 ## 2024-11-27 Moved Strava credentials to Strava_API_credentials.R
 ## 2024-11-04 Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-29 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
