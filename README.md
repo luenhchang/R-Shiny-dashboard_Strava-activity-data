@@ -28,6 +28,12 @@ You can view the live app here: [Strava activity data](https://luenhchang.shinya
 ### Tables
 ![Active hours](https://github.com/luenhchang/R-Shiny-dashboard_Strava-activity-data/blob/main/app-printscreens/table_active-hours.png)
 
+---
+
+![Pool swimming data](https://github.com/luenhchang/R-Shiny-dashboard_Strava-activity-data/blob/main/app-printscreens/table_pool-swimming-data.png)
+
+---
+
 ## Installation
 To run this application locally:
 1. Clone this repository:

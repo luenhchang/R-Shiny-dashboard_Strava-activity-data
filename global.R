@@ -4,7 +4,7 @@
 # Date created: 01-OCT-2024
 # Author(s): Lun-Hsien Chang
 # Input: 
-# Output: https://luenhchang.shinyapps.io/Strava-activity-data/  
+# Output: https://luenhchang.shinyapps.io/Strava-activity-data/
 # References
 ## [How to Scrape and Store Strava Data Using R](https://rviews.rstudio.com/2021/11/22/strava-data/)
 ## [rStrava](https://fawda123.github.io/rStrava/)
@@ -17,6 +17,7 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-11-04 Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-29 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-22 Successfully deployed to <https://luenhchang.shinyapps.io/Strava-activity-data/> Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
 ## 2024-10-06 Deployed app
