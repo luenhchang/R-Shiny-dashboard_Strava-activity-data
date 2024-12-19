@@ -1,7 +1,7 @@
 # R Shiny Dashboard: Strava Activity Data
 
-## Latest Updates
-- **2024-12-19**: 
+## Updates
+**2024-12-19**:
 * Moved custom functions from `global.R` and `server.R` to `functions.R`
 * Sorted all DT dataTables by descending orders of Date and Activity
 * Updated Plotly bar plot to show every month on the X axis
