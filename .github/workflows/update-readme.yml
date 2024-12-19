@@ -1,4 +1,4 @@
-name: Update README
+name: Update README.md
 
 on:
   push:
@@ -8,24 +8,27 @@ on:
 jobs:
   update-readme:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Git
-        run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-
-      - name: Replace Last Updated placeholder
-        run: |
-          # Replace <!--LAST_UPDATED--> with the current date (in YYYY-MM-DD format)
-          CURRENT_DATE=$(date +'%Y-%m-%d')
-          sed -i "s|<!--LAST_UPDATED-->|$CURRENT_DATE|" README.md
-
-      - name: Commit changes to README.md
-        run: |
-          git add README.md
-          git commit -m "Update README.md with latest changes"
-          git push
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Set up Git
+      uses: actions/setup-git@v2
+    
+    - name: Get current date
+      run: echo "LAST_UPDATED=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+    
+    - name: Update README.md
+      run: |
+        sed -i "s|<!--LAST_UPDATED-->|$LAST_UPDATED|" README.md
+    
+    - name: Commit and push changes
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add README.md
+        git commit -m "Update README.md with latest changes"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
