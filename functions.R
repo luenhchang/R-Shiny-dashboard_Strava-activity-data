@@ -9,7 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
-## 2024-12-19 Moved functions from global.R, server.R to here
+## 2024-12-19 Moved customed functions from global.R, server.R to here
 ##---------------------------------------------------------------------------------------------------------
 
 #-----------------------------
