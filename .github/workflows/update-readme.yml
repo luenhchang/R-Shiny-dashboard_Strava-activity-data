@@ -1,34 +1,36 @@
-name: Update README.md
+name: Update README.md with current date
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
+    - name: Checkout the repository
       uses: actions/checkout@v2
-    
-    - name: Set up Git
-      uses: actions/setup-git@v2
-    
-    - name: Get current date
-      run: echo "LAST_UPDATED=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-    
-    - name: Update README.md
+
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
+
+    - name: Install required R packages
       run: |
-        sed -i "s|<!--LAST_UPDATED-->|$LAST_UPDATED|" README.md
-    
-    - name: Commit and push changes
+        install.packages("stringr")
+
+    - name: Run the R script to update README.md
+      run: |
+        Rscript update_readme.R
+
+    - name: Commit and push the updated README.md
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
         git add README.md
-        git commit -m "Update README.md with latest changes"
+        git commit -m "Update README.md with the latest date"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
