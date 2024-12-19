@@ -1,10 +1,5 @@
 # R Shiny Dashboard: Strava Activity Data
 
-## Latest Updates
-- Last updated: <!--LAST_UPDATED-->
-
----
-
 ## Updates
 **2024-12-19**:
 * Moved custom functions from `global.R` and `server.R` to `functions.R`
