@@ -1,5 +1,10 @@
 # R Shiny Dashboard: Strava Activity Data
 
+## Latest Updates
+- Last updated: <!--LAST_UPDATED-->
+
+---
+
 ## Updates
 **2024-12-19**:
 * Moved custom functions from `global.R` and `server.R` to `functions.R`
@@ -7,10 +12,8 @@
 * Updated Plotly bar plot to show every month on the X axis
 * Changed `Moving time` from lubridate to character to keep 'xxH xxM xxS' format in DT dataTables
 
----
-
-## Latest Updates
-- Last updated: <!--LAST_UPDATED-->
+**2024-11-04**
+* Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.
 
 ---
 

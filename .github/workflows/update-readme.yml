@@ -18,11 +18,13 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
 
-      - name: Replace Last Updated
+      - name: Replace Last Updated placeholder
         run: |
-          sed -i "s|<!--LAST_UPDATED-->|$(date +'%Y-%m-%d')|" README.md
+          # Replace <!--LAST_UPDATED--> with the current date (in YYYY-MM-DD format)
+          CURRENT_DATE=$(date +'%Y-%m-%d')
+          sed -i "s|<!--LAST_UPDATED-->|$CURRENT_DATE|" README.md
 
-      - name: Commit changes
+      - name: Commit changes to README.md
         run: |
           git add README.md
           git commit -m "Update README.md with latest changes"
