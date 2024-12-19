@@ -17,6 +17,7 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-12-19 Moved all customed functions to functions.R
 ## 2024-11-27 Moved shinyapps.io account checking to check_shinyapps_io_accounts.R
 ## 2024-11-27 Moved Strava credentials to Strava_API_credentials.R
 ## 2024-11-04 Deployment completed: https://luenhchang.shinyapps.io/Strava-activity-data/
@@ -59,7 +60,11 @@ dir.fitness <- file.path(dir.C, "GoogleDrive_MyDrive","Fitness")
 dir.Strava <- file.path(dir.fitness,"Strava")
 dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
 
+#----------------------------------
+# Import functions from functions.R
+#----------------------------------
 #setwd(dir.app)
+source("functions.R")
 
 #------------------------------
 # Scraping functions (no token)
@@ -88,14 +93,10 @@ my_acts <- rStrava::get_activity_list( stoken
                                        ,after = profile.start.date #as.Date('2020-12-31')
 ) # class(my_acts) "list"
 
-# User-defined function for NA
-not_all_na <- function(x) any(!is.na(x)) # if all values are NA
-not_any_na <- function(x) all(!is.na(x)) # if any value is NA
-
 act_data <- rStrava::compile_activities(my_acts) |>
   # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
   dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 922 52
+# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 947 52
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -396,10 +397,10 @@ activities.2023 <- act_data.1 %>%
 activities.2024 <- act_data.1 %>%
   dplyr::filter(start.year.local==2024) %>%
   dplyr::arrange(start.datetime.local) %>%
-  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 226 24
+  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 243 24
 
 data.moving.time.2024 <- activities.2024 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 212 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 229 24
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#

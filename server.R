@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-12-19 Moved all customed functions to functions.R
 ## 2024-11-04 Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.
 ## 2024-06-04 Added plotly bar plot subplots, one per food category. Currently no control on bar color and subplot titles
 ## 2024-05-16 Commented out shiny::renderUI({rmarkdown::render() shiny::includeHTML('menuItem-Fitness.html') }). Now includeHTML() is used to read a html file, which was knitted as html_fragment in .Rmd files
@@ -18,34 +19,9 @@
 ## 2024-04-24 Created function.renderValueBox(), function.renderInfoBox() with optional arguments that have default values to generate script for renderValueBox(), renderInfoBox()
 ## 2024-04-23 Added a image slideshow under menuItem Data 
 ##---------------------------------------------------------------------------------------------------------
-
-# Color
-color.global.infoBox <- "olive"
-color.global.valueBox <- "orange"
-
-marker_style <- list(line = list(width = 0.5,
-                                 color = 'rgb(0, 0, 0)'))
-
-# Function to get the number of days in a given year
-days_in_year <- function(year) {
-  if (leap_year(year)) {
-    return(366)
-  } else {
-    return(365)
-  }
-}
-
-# Get the current year
-current_year <- as.numeric(format(Sys.Date(), "%Y"))
-
-# Function to check if a year is the current year
-is_current_year <- function(year) {
-  return(year == current_year)
-}
-
-# Example usage
-#is_current_year(2024)  # Returns TRUE if the current year is 2024
-#is_current_year(2023)  # Returns FALSE if the current year is not 2023
+# Get functions here
+#setwd(dir.app)
+source("functions.R")
 
 #-------
 # Server
@@ -56,52 +32,7 @@ server <- function(input, output, session) {
   ## [How to stop running shiny app by closing the browser window?](https://stackoverflow.com/questions/35306295/how-to-stop-running-shiny-app-by-closing-the-browser-window)
   ## This is a bad idea! If multiple users are connected to the app, then one user (or browser tab) exiting will cause everyone to be kicked off! – Joe Cheng Aug 7, 2020 at 19:23
   session$onSessionEnded(function() { stopApp() })
-  
-  #------------------------------------------------------------------------------------------------
-  # Create functions for output
-  ## [Create Function for output in Shiny](https://stackoverflow.com/questions/53590526/create-function-for-output-in-shiny)
-  ## ["Correct" way to specifiy optional arguments in R functions](https://stackoverflow.com/questions/28370249/correct-way-to-specifiy-optional-arguments-in-r-functions)
-  ## [How do you use "<<-" (scoping assignment) in R?](https://stackoverflow.com/questions/2628621/how-do-you-use-scoping-assignment-in-r)
-  #------------------------------------------------------------------------------------------------
-  # Define function for renderValueBox()
-  function.renderValueBox <- function(output.id
-                                      ,argument.value
-                                      ,argument.subtitle
-                                      ,argument.icon
-                                      ,argument.icon.lib
-                                      ,argument.color){
-    # Write default values to optional arguments
-    if(missing(argument.icon)){argument.icon <- "th-list"}
-    if(missing(argument.icon.lib)){argument.icon.lib <- "glyphicon"}
-    if(missing(argument.color)){argument.color<-"orange"}
-    
-    output[[output.id]] <<- shinydashboard::renderValueBox({
-      shinydashboard::valueBox(
-        value = argument.value
-        ,subtitle = argument.subtitle
-        #,icon = icon(argument.icon, lib = argument.icon.lib)
-        ,color = argument.color)
-    }) # Close renderValueBox()
-  } # Close function{}
-  
-  # Define function for renderInfoBox()
-  ## Default icon set to trophy
-  function.renderInfoBox <- function(output.id, arg.title, arg.value, arg.icon, arg.color, arg.fill){
-    # Write default values to optional arguments
-    if(missing(arg.icon)){arg.icon<-"trophy"}
-    if(missing(arg.color)){arg.color<-"olive"}
-    if(missing(arg.fill)){arg.fill <- TRUE}
 
-    output[[output.id]] <<- shinydashboard::renderInfoBox({
-      shinydashboard::infoBox(
-        title = arg.title
-        ,value = arg.value
-        ,icon=icon(arg.icon)
-        ,color = arg.color
-        ,fill = arg.fill)
-    }) # Close renderInfoBox()
-  }# Close function{}
-  
   #**********************************************
   # Outputs to use under menuItem "Active Time"
   #**********************************************
@@ -110,22 +41,22 @@ server <- function(input, output, session) {
   # 2023 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(output.id="valueBox.year.in.sport.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.year.in.sport.2023"
                           ,argument.value=unique(activities.2023$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(output.id="valueBox.number.days.active.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.number.days.active.2023"
                           ,argument.value=length(unique(activities.2023$start.date.local)) # 275
                           ,argument.subtitle="Days active")
   
   # Calculate % of days in 2023 that were active 
   proportion.days.active.2023 <- round(length(unique(activities.2023$start.date.local))/days_in_year(unique(activities.2023$start.year.local))*100, digits = 2)
   
-  function.renderValueBox(output.id="valueBox.proportion.days.active.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.proportion.days.active.2023"
                           ,argument.value=proportion.days.active.2023 # 75.34
                           ,argument.subtitle="% days active")
   
-  function.renderValueBox(output.id="valueBox.total.moving.hours.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.moving.hours.2023"
                           ,argument.value=paste(round(sum(activities.2023$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
   
@@ -220,11 +151,11 @@ server <- function(input, output, session) {
   # 2024 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(output.id="valueBox.year.in.sport.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.year.in.sport.2024"
                           ,argument.value=unique(activities.2024$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(output.id="valueBox.number.days.active.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.number.days.active.2024"
                           ,argument.value=length(unique(activities.2024$start.date.local)) # 275
                           ,argument.subtitle="Days active")
   
@@ -237,20 +168,20 @@ server <- function(input, output, session) {
     # Calculate proportion of days active for a past year
     ,length(unique(activities.2024$start.date.local))/days_in_year(unique(activities.2024$start.year.local))*100)
   
-  function.renderValueBox(output.id="valueBox.proportion.days.active.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.proportion.days.active.2024"
                           ,argument.value=round(proportion.days.active.2024, digits = 2) # 57.77
                           ,argument.subtitle="% days active")
   
   
-  function.renderValueBox(output.id="valueBox.total.moving.hours.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.moving.hours.2024"
                           ,argument.value=paste(round(sum(activities.2024$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
   
-  function.renderValueBox(output.id="valueBox.total.cycling.distance.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.distance.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
                           ,argument.subtitle="Total cycling distance")
   
-  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.elevation.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   
@@ -282,7 +213,13 @@ server <- function(input, output, session) {
                            ,"km")
                          )
                        ) %>%
-      plotly::layout( xaxis=list(title="Date",titlefont= list(size=40),tickformat="%b")
+      plotly::layout( xaxis=list(title="Date"
+                                 ,titlefont= list(size=40)
+                                 ,tickmode = "array",  # Display custom tick marks
+                                 tickvals = unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), # Start of each month
+                                 ticktext = format(unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), "%b"), # Month abbreviations
+                                 tickangle = 0
+                                 )
                      ,yaxis = list(title = 'Hours',titlefont= list(size=40))
                      ,barmode = 'stack'
                      # Left align hover text
@@ -380,12 +317,14 @@ server <- function(input, output, session) {
       dplyr::rename(Date=start.date.local
                     ,Activity=name
                     ,`Sport type`=sport_type
-                    ,`Active time`=moving.time.hour
+                    ,`Active hours`=moving.time.hour
                     ,`Averaged heart rate`= average_heartrate
                     ,`Max heart rate`=max_heartrate) # dim(act_data.2) 924 6
     
     # Left-align character columns, right-align numeric columns
-    DT::datatable(act_data.2) %>%
+    DT::datatable(act_data.2
+                  ,options = list(order=list(c(1, 'desc'),c(2, 'desc'))) # Sort by 'Date' (1) and Activity (2) columns in descending order
+                  ) %>%
       DT::formatStyle(
          columns = names(act_data.2)
         ,textAlign= styleInterval(0, c("left","right"))
@@ -402,7 +341,7 @@ server <- function(input, output, session) {
   
   output$plotly.bubble.plot.swim.pace.distance <- plotly::renderPlotly({
     # Make a bubble plot
-    poolswim.combined |> 
+    poolswim.combined %>% 
     plotly::plot_ly(x=~Activity_date
                     ,y= ~pace_mmss_per100meters_fmt
                     ,text= ~hovertext #~Laps_training
@@ -416,7 +355,7 @@ server <- function(input, output, session) {
                                               )
                                    ,opacity = 0.9
                                    )
-                    ) |>
+                    ) %>%
       plotly::layout( xaxis=list(title="Date")
                       ,yaxis=list(title="Pace (mm::ss/100 meters)")
                       ,hoverlabel = list(align = "left") # Left-align hover text
@@ -432,41 +371,14 @@ server <- function(input, output, session) {
                       )
       ) # Close layout
 })
-  
-  #----------------
-  # Output valueBox
-  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
-  #----------------
-  # function.renderValueBox(output.id="valueBox.num.unique.food.barcodes"
-  #                         ,argument.value=num.unique.food.barcode
-  #                         ,argument.subtitle="Barcodes scanned")
-  # 
-  # function.renderValueBox(output.id="valueBox.num.food.category"
-  #                         ,argument.value=num.food.category
-  #                         ,argument.subtitle="Food categories")
-  # 
-  # function.renderValueBox(output.id = "valueBox.num.food.no.category"
-  #                         ,argument.value = num.food.no.category
-  #                         ,argument.subtitle = "Uncategorised foods"
-  #                         ,argument.icon ="thumbs-down" )
-  # 
-  # function.renderValueBox(output.id="valueBox.num.food.expired"
-  #                         ,argument.value=num.food.expired
-  #                         ,argument.subtitle="Foods expired"
-  #                         ,argument.icon ="thumbs-down" )
-  # 
-  # function.renderValueBox(output.id="valueBox.summed.price.food"
-  #                         ,argument.value=paste0("$AUD ",summed.price.food)
-  #                         ,argument.subtitle="Spent on food"
-  #                         ,argument.icon ="credit-card")
 
   #----------------------------------------------------------------------------------------
   # Output DT dataTable
   ## Ref [How can I introduce a new line within a column using DTedit and shiny::uiOutput?](https://stackoverflow.com/questions/56590555/how-can-i-introduce-a-new-line-within-a-column-using-dtedit-and-shinyuioutput)
   #----------------------------------------------------------------------------------------
   output$table.poolswim <- DT::renderDataTable({
-    table.poolswim <- poolswim.combined |> 
-      dplyr::select(Strava_activity_name, Activity_date, Corrected_distance_meters, Corrected_moving_time, pace_mmss_per100meters_fmt, average_heartrate, max_heartrate) |>
+    table.poolswim <- poolswim.combined %>% 
+      dplyr::select(Strava_activity_name, Activity_date, Corrected_distance_meters, Corrected_moving_time, pace_mmss_per100meters_fmt, average_heartrate, max_heartrate) %>%
       dplyr::rename(Event=Strava_activity_name
                     ,Date=Activity_date
                     ,`Distance(m)`=Corrected_distance_meters
@@ -476,7 +388,10 @@ server <- function(input, output, session) {
                     ,`Max heartrate`=max_heartrate) # dim(table.food.category.product.name) 122 2
     
     DT::datatable(table.poolswim
-                  ,options = list(autoWidth = FALSE, searching = TRUE))
+                  ,options = list(autoWidth = FALSE
+                                  ,searching = TRUE
+                                  ,order=list(2, 'desc')) # Sort by Date (2) column in descending order
+                  )
   })
   
   #*****************************************
@@ -484,7 +399,7 @@ server <- function(input, output, session) {
   #*****************************************
   output$plotly.bubble.plot.walk.pace.distance <- plotly::renderPlotly({
   # Make a bubble plot
-  walk |> 
+  walk %>% 
     plotly::plot_ly( x= ~start_date
                     ,y= ~ pace_mmss_per_km_fmt
                     ,text= ~hovertext #~Laps_training
@@ -496,7 +411,7 @@ server <- function(input, output, session) {
                                    ,line=list(color='red')
                                    ,opacity = 0.9
                                    )
-                    ) |>
+                    ) %>%
     plotly::layout( xaxis=list(title="Date")
                     ,yaxis=list(title="Averaged Pace (mm::ss/km)")
                     ,hoverlabel = list(align = "left") # Left-align hover text
@@ -516,16 +431,23 @@ server <- function(input, output, session) {
   # Output DT dataTable
   #----------------------------------------------------------------------------------------
   output$table.walk <- DT::renderDataTable({
-    table.walk <- walk |> 
-      dplyr::select(name, start_date, distance, moving_time_period,total_elevation_gain, pace_mmss_per_km_fmt) |>
+    table.walk <- walk %>% 
+      dplyr::select(name, start_date, distance, moving_time_period,total_elevation_gain, pace_mmss_per_km_fmt) %>%
+      dplyr::mutate(distance=round(distance, digits = 2)
+                    ,moving_time_period=as.character(moving_time_period)) %>%
       dplyr::rename(Event=name
                     ,Date=start_date
                     ,`Distance (km)`=distance
-                    ,`Moving ime`=moving_time_period
+                    ,`Moving time`=moving_time_period
                     ,`Elevation gain (m)`=total_elevation_gain
                     ,`Avg Pace (mm:ss/ km)`=pace_mmss_per_km_fmt) # dim(table.food.category.product.name) 122 2
     DT::datatable(table.walk
-                  ,options = list(autoWidth = FALSE, searching = TRUE))
+                  ,options = list(autoWidth = FALSE
+                                  ,searching = TRUE
+                                  # Sort by 'Date' and 'Activity' both in descending order
+                                  ,order=list(c(2, 'desc'), c(1, 'desc'))
+                                  )
+                  )
   })
   #*****************************************
   # Read data to use under menuItem "Run" 
@@ -544,7 +466,7 @@ server <- function(input, output, session) {
                                       ,line=list(color='red')
                                       ,opacity = 0.9
                        )
-      ) |>
+      ) %>%
       plotly::layout( xaxis=list(title="Date")
                       ,yaxis=list(title="Averaged Pace (mm::ss/km)")
                       ,hoverlabel = list(align = "left") # Left-align hover text
@@ -565,18 +487,24 @@ server <- function(input, output, session) {
   # Output DT dataTable
   #--------------------
   output$table.run <- DT::renderDataTable({
-    table.run <- run |> 
-      dplyr::select(name, start_date, distance, moving_time_period, total_elevation_gain, pace_mmss_per_km_fmt, average_heartrate, max_heartrate ) |>
+    table.run <- run %>% 
+      dplyr::select(name, start_date, distance, moving_time_period, total_elevation_gain, pace_mmss_per_km_fmt, average_heartrate, max_heartrate ) %>%
+      dplyr::mutate(distance=round(distance, digits = 2)
+                    ,moving_time_period=as.character(moving_time_period)) %>%
       dplyr::rename(Event=name
                     ,Date=start_date
                     ,`Distance (km)`=distance
-                    ,`Moving ime`=moving_time_period
+                    ,`Moving time`=moving_time_period
                     ,`Elevation gain (m)`=total_elevation_gain
                     ,`Avg Pace (mm:ss/ km)`=pace_mmss_per_km_fmt
                     ,`Avg heart rate`=average_heartrate
                     ,`Max heart rate`=max_heartrate) # dim(table.run) 16 8
     DT::datatable(table.run
-                  ,options = list(autoWidth = TRUE, searching = TRUE))
+                  ,options = list(searching = TRUE
+                                  # Sort by 'Date' and 'Activity' both in descending order
+                                  ,order=list(c(2, 'desc'), c(1, 'desc'))
+                                  )
+                  )
   })
   
   #*****************************************
@@ -587,15 +515,15 @@ server <- function(input, output, session) {
   # 2023 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(output.id="valueBox.ride.year.in.sport.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.ride.year.in.sport.2023"
                           ,argument.value=unique(activities.2023$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(output.id="valueBox.total.cycling.distance.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.distance.2023"
                           ,argument.value=paste(format(round(sum(activities.2023$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
                           ,argument.subtitle="Total cycling distance")
   
-  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2023"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.elevation.2023"
                           ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   
@@ -603,15 +531,15 @@ server <- function(input, output, session) {
   # 2024 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(output.id="valueBox.ride.year.in.sport.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.ride.year.in.sport.2024"
                           ,argument.value=unique(activities.2024$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(output.id="valueBox.total.cycling.distance.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.distance.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
                           ,argument.subtitle="Total cycling distance")
   
-  function.renderValueBox(output.id="valueBox.total.cycling.elevation.2024"
+  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.elevation.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   #----------------------------------------------------------------------
@@ -858,7 +786,10 @@ server <- function(input, output, session) {
                      ,`Elevation gain`=elevation.gain.m.day
                      ,`Cumulative elevation`=ride.elevation.cum.year)
     
-    datatable(ride.day.1) %>%
+    DT::datatable(ride.day.1
+                  ,options = list(order=list(c(1, 'desc'),c(3, 'desc'))
+                                  )
+                  ) %>%
       DT::formatStyle(
         columns = names(ride.day.1) # Apply to all columns
         # Use styleInterval to set alignment
@@ -872,15 +803,15 @@ server <- function(input, output, session) {
   #----------------------------
   # InfoBoxes
   #----------------------------
-  function.renderInfoBox(output.id = "infoBox.yearly.weekday.greatest.total.ride.number"
+  function.renderInfoBox(shiny_output = output, output.id = "infoBox.yearly.weekday.greatest.total.ride.number"
                          ,arg.title="Most active weekday in"
                          ,arg.value=infobox.value.yearly.weekday.highest.ride.number
                          ,arg.icon = "chart-bar")
-  function.renderInfoBox(output.id = "infoBox.yearly.weekday.longest.total.ride.distance"
+  function.renderInfoBox(shiny_output = output, output.id = "infoBox.yearly.weekday.longest.total.ride.distance"
                          ,arg.title="Most distance-productive weekday in"
                          ,arg.value=infobox.value.yearly.weekday.longest.ride.distance
                          ,arg.icon = "map")
-  function.renderInfoBox(output.id = "infoBox.yearly.weekday.best.total.ride.elevation"
+  function.renderInfoBox(shiny_output = output, output.id = "infoBox.yearly.weekday.best.total.ride.elevation"
                          ,arg.title = "Most elevation-productive weekday in"
                          ,arg.value = infobox.value.yearly.weekday.greatest.ride.elevation
                          ,arg.icon = "arrow-up")
