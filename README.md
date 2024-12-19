@@ -1,15 +1,35 @@
 # R Shiny Dashboard: Strava Activity Data
 
+## Latest Updates
+- **2024-12-19**: 
+* Moved custom functions from `global.R` and `server.R` to `functions.R`
+* Sorted all DT dataTables by descending orders of Date and Activity
+* Updated Plotly bar plot to show every month on the X axis
+* Changed `Moving time` from lubridate to character to keep 'xxH xxM xxS' format in DT dataTables
+
+---
+
+## Latest Updates
+- Last updated: <!--LAST_UPDATED-->
+
+---
+
 ## Introduction
 This repository contains an interactive R Shiny application that connects to the Strava API to retrieve and visualise activity data from a single user. The app provides insights into activity trends, performance metrics, and much more in an engaging and user-friendly interface.
+
+---
 
 ## Features
 - **Data Retrieval**: Fetches activity data directly from the Strava API and Google sheet
 - **Visualisations**: Includes interactive plots, static plots and metrics for activity summaries, trends, and comparisons.
 - **Interactivity**: Offers hovertext, tables with search and sorting features for detailed analysis.
 
+---
+
 ## Demo
 You can view the live app here: [Strava activity data](https://luenhchang.shinyapps.io/Strava-activity-data/).
+
+---
 
 ## Screenshots
 
