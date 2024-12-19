@@ -32,7 +32,7 @@ server <- function(input, output, session) {
   ## [How to stop running shiny app by closing the browser window?](https://stackoverflow.com/questions/35306295/how-to-stop-running-shiny-app-by-closing-the-browser-window)
   ## This is a bad idea! If multiple users are connected to the app, then one user (or browser tab) exiting will cause everyone to be kicked off! – Joe Cheng Aug 7, 2020 at 19:23
   session$onSessionEnded(function() { stopApp() })
-
+  
   #**********************************************
   # Outputs to use under menuItem "Active Time"
   #**********************************************
@@ -41,22 +41,26 @@ server <- function(input, output, session) {
   # 2023 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(shiny_output = output, output.id="valueBox.year.in.sport.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.year.in.sport.2023"
                           ,argument.value=unique(activities.2023$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.number.days.active.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.number.days.active.2023"
                           ,argument.value=length(unique(activities.2023$start.date.local)) # 275
                           ,argument.subtitle="Days active")
   
   # Calculate % of days in 2023 that were active 
   proportion.days.active.2023 <- round(length(unique(activities.2023$start.date.local))/days_in_year(unique(activities.2023$start.year.local))*100, digits = 2)
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.proportion.days.active.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.proportion.days.active.2023"
                           ,argument.value=proportion.days.active.2023 # 75.34
                           ,argument.subtitle="% days active")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.moving.hours.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.moving.hours.2023"
                           ,argument.value=paste(round(sum(activities.2023$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
   
@@ -151,11 +155,13 @@ server <- function(input, output, session) {
   # 2024 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(shiny_output = output, output.id="valueBox.year.in.sport.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.year.in.sport.2024"
                           ,argument.value=unique(activities.2024$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.number.days.active.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.number.days.active.2024"
                           ,argument.value=length(unique(activities.2024$start.date.local)) # 275
                           ,argument.subtitle="Days active")
   
@@ -168,20 +174,24 @@ server <- function(input, output, session) {
     # Calculate proportion of days active for a past year
     ,length(unique(activities.2024$start.date.local))/days_in_year(unique(activities.2024$start.year.local))*100)
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.proportion.days.active.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.proportion.days.active.2024"
                           ,argument.value=round(proportion.days.active.2024, digits = 2) # 57.77
                           ,argument.subtitle="% days active")
   
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.moving.hours.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.moving.hours.2024"
                           ,argument.value=paste(round(sum(activities.2024$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.distance.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.distance.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
                           ,argument.subtitle="Total cycling distance")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.elevation.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.elevation.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   
@@ -206,24 +216,24 @@ server <- function(input, output, session) {
                            ,lubridate::hour(data.moving.time.2024$start.datetime.local)
                            ,":"
                            ,lubridate::minute(data.moving.time.2024$start.datetime.local)
-                           ) # Close paste()
+                         ) # Close paste()
                          ,"<br> Active hours :", paste(format(round(data.moving.time.2024$moving.time.hour, digits = 2), nsmall=2),"h")
                          ,"<br> Distance:", paste(
                            format(round(data.moving.time.2024$distance.km, digits = 2), nsmall=2)
                            ,"km")
-                         )
-                       ) %>%
+                       )
+      ) %>%
       plotly::layout( xaxis=list(title="Date"
                                  ,titlefont= list(size=40)
                                  ,tickmode = "array",  # Display custom tick marks
                                  tickvals = unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), # Start of each month
                                  ticktext = format(unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), "%b"), # Month abbreviations
                                  tickangle = 0
-                                 )
-                     ,yaxis = list(title = 'Hours',titlefont= list(size=40))
-                     ,barmode = 'stack'
-                     # Left align hover text
-                     ,hoverlabel = list(align = "left"))
+      )
+      ,yaxis = list(title = 'Hours',titlefont= list(size=40))
+      ,barmode = 'stack'
+      # Left align hover text
+      ,hoverlabel = list(align = "left"))
   })
   
   # Plot moving time in 2024 using ggplot2 as a static plot
@@ -324,9 +334,9 @@ server <- function(input, output, session) {
     # Left-align character columns, right-align numeric columns
     DT::datatable(act_data.2
                   ,options = list(order=list(c(1, 'desc'),c(2, 'desc'))) # Sort by 'Date' (1) and Activity (2) columns in descending order
-                  ) %>%
+    ) %>%
       DT::formatStyle(
-         columns = names(act_data.2)
+        columns = names(act_data.2)
         ,textAlign= styleInterval(0, c("left","right"))
       )
   })
@@ -342,25 +352,25 @@ server <- function(input, output, session) {
   output$plotly.bubble.plot.swim.pace.distance <- plotly::renderPlotly({
     # Make a bubble plot
     poolswim.combined %>% 
-    plotly::plot_ly(x=~Activity_date
-                    ,y= ~pace_mmss_per100meters_fmt
-                    ,text= ~hovertext #~Laps_training
-                    ,hoverinfo = 'text'  # Display only the custom hover text
-                    ,type = 'scatter'
-                    ,size = ~ Corrected_distance_meters
-                    ,mode= "markers"
-                    ,marker = list(color="black"
-                                   ,line=list(color='red'
-                                              #,width=2
-                                              )
-                                   ,opacity = 0.9
-                                   )
-                    ) %>%
+      plotly::plot_ly(x=~Activity_date
+                      ,y= ~pace_mmss_per100meters_fmt
+                      ,text= ~hovertext #~Laps_training
+                      ,hoverinfo = 'text'  # Display only the custom hover text
+                      ,type = 'scatter'
+                      ,size = ~ Corrected_distance_meters
+                      ,mode= "markers"
+                      ,marker = list(color="black"
+                                     ,line=list(color='red'
+                                                #,width=2
+                                     )
+                                     ,opacity = 0.9
+                      )
+      ) %>%
       plotly::layout( xaxis=list(title="Date")
                       ,yaxis=list(title="Pace (mm::ss/100 meters)")
                       ,hoverlabel = list(align = "left") # Left-align hover text
                       ,annotations = list(
-                         x = 0  # x-position of the annotation
+                        x = 0  # x-position of the annotation
                         ,y = 1    # y-position of the annotation
                         ,xref = 'paper'
                         ,yref = 'paper'
@@ -370,8 +380,8 @@ server <- function(input, output, session) {
                         ,align = "left"
                       )
       ) # Close layout
-})
-
+  })
+  
   #----------------------------------------------------------------------------------------
   # Output DT dataTable
   ## Ref [How can I introduce a new line within a column using DTedit and shiny::uiOutput?](https://stackoverflow.com/questions/56590555/how-can-i-introduce-a-new-line-within-a-column-using-dtedit-and-shinyuioutput)
@@ -391,42 +401,42 @@ server <- function(input, output, session) {
                   ,options = list(autoWidth = FALSE
                                   ,searching = TRUE
                                   ,order=list(2, 'desc')) # Sort by Date (2) column in descending order
-                  )
+    )
   })
   
   #*****************************************
   # Read data to use under menuItem "Walk" 
   #*****************************************
   output$plotly.bubble.plot.walk.pace.distance <- plotly::renderPlotly({
-  # Make a bubble plot
-  walk %>% 
-    plotly::plot_ly( x= ~start_date
-                    ,y= ~ pace_mmss_per_km_fmt
-                    ,text= ~hovertext #~Laps_training
-                    ,hoverinfo = 'text'  # Display only the custom hover text
-                    ,type = 'scatter'
-                    ,size = ~ distance
-                    ,mode= "markers"
-                    ,marker = list(color="black"
-                                   ,line=list(color='red')
-                                   ,opacity = 0.9
-                                   )
-                    ) %>%
-    plotly::layout( xaxis=list(title="Date")
-                    ,yaxis=list(title="Averaged Pace (mm::ss/km)")
-                    ,hoverlabel = list(align = "left") # Left-align hover text
-                    ,annotations = list(
-                      x = 0  # x-position of the annotation
-                      ,y = 1    # y-position of the annotation
-                      ,xref = 'paper'
-                      ,yref = 'paper'
-                      ,text = 'Bubble size represents distance (km)'
-                      ,showarrow = FALSE
-                      ,font = list(size = 12)
-                      ,align = "left"
-                    )
-    ) # Close layout
-})
+    # Make a bubble plot
+    walk %>% 
+      plotly::plot_ly( x= ~start_date
+                       ,y= ~ pace_mmss_per_km_fmt
+                       ,text= ~hovertext #~Laps_training
+                       ,hoverinfo = 'text'  # Display only the custom hover text
+                       ,type = 'scatter'
+                       ,size = ~ distance
+                       ,mode= "markers"
+                       ,marker = list(color="black"
+                                      ,line=list(color='red')
+                                      ,opacity = 0.9
+                       )
+      ) %>%
+      plotly::layout( xaxis=list(title="Date")
+                      ,yaxis=list(title="Averaged Pace (mm::ss/km)")
+                      ,hoverlabel = list(align = "left") # Left-align hover text
+                      ,annotations = list(
+                        x = 0  # x-position of the annotation
+                        ,y = 1    # y-position of the annotation
+                        ,xref = 'paper'
+                        ,yref = 'paper'
+                        ,text = 'Bubble size represents distance (km)'
+                        ,showarrow = FALSE
+                        ,font = list(size = 12)
+                        ,align = "left"
+                      )
+      ) # Close layout
+  })
   #----------------------------------------------------------------------------------------
   # Output DT dataTable
   #----------------------------------------------------------------------------------------
@@ -446,27 +456,27 @@ server <- function(input, output, session) {
                                   ,searching = TRUE
                                   # Sort by 'Date' and 'Activity' both in descending order
                                   ,order=list(c(2, 'desc'), c(1, 'desc'))
-                                  )
                   )
+    )
   })
   #*****************************************
   # Read data to use under menuItem "Run" 
   #*****************************************
   output$plotly.bubble.plot.run.pace.distance <- plotly::renderPlotly({
     # Make a bubble plot
-      plotly::plot_ly( data = run
-                       ,x= ~start_date
-                       ,y= ~ pace_mmss_per_km_fmt
-                       ,text= ~hovertext #~Laps_training
-                       ,hoverinfo = 'text'  # Display only the custom hover text
-                       ,type = 'scatter'
-                       ,size = ~ distance
-                       ,mode= "markers"
-                       ,marker = list(color="black"
-                                      ,line=list(color='red')
-                                      ,opacity = 0.9
-                       )
-      ) %>%
+    plotly::plot_ly( data = run
+                     ,x= ~start_date
+                     ,y= ~ pace_mmss_per_km_fmt
+                     ,text= ~hovertext #~Laps_training
+                     ,hoverinfo = 'text'  # Display only the custom hover text
+                     ,type = 'scatter'
+                     ,size = ~ distance
+                     ,mode= "markers"
+                     ,marker = list(color="black"
+                                    ,line=list(color='red')
+                                    ,opacity = 0.9
+                     )
+    ) %>%
       plotly::layout( xaxis=list(title="Date")
                       ,yaxis=list(title="Averaged Pace (mm::ss/km)")
                       ,hoverlabel = list(align = "left") # Left-align hover text
@@ -503,8 +513,8 @@ server <- function(input, output, session) {
                   ,options = list(searching = TRUE
                                   # Sort by 'Date' and 'Activity' both in descending order
                                   ,order=list(c(2, 'desc'), c(1, 'desc'))
-                                  )
                   )
+    )
   })
   
   #*****************************************
@@ -515,15 +525,18 @@ server <- function(input, output, session) {
   # 2023 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(shiny_output = output, output.id="valueBox.ride.year.in.sport.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.ride.year.in.sport.2023"
                           ,argument.value=unique(activities.2023$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.distance.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.distance.2023"
                           ,argument.value=paste(format(round(sum(activities.2023$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
                           ,argument.subtitle="Total cycling distance")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.elevation.2023"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.elevation.2023"
                           ,argument.value=paste(format(round(sum(activities.2023$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   
@@ -531,15 +544,18 @@ server <- function(input, output, session) {
   # 2024 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
   #----------------
-  function.renderValueBox(shiny_output = output, output.id="valueBox.ride.year.in.sport.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.ride.year.in.sport.2024"
                           ,argument.value=unique(activities.2024$start.year.local)
                           ,argument.subtitle="Year in sport")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.distance.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.distance.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
                           ,argument.subtitle="Total cycling distance")
   
-  function.renderValueBox(shiny_output = output, output.id="valueBox.total.cycling.elevation.2024"
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.elevation.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
   #----------------------------------------------------------------------
@@ -590,13 +606,13 @@ server <- function(input, output, session) {
                   ,title = 'Elevation gain'
                   ,tickvals = seq(0, 1000, by = 250)  # Set color scale ticks to 0, 100, 200, ..., 1000
                   ,ticktext = seq(0, 1000, by = 250)  # Optional: Specify tick labels for colorbar
-                  )
+                )
         ) %>%
           layout( xaxis = list(title = "Week", dtick=10) # This has no effect changing title and tick interval
-                 ,yaxis = list(title = ""
-                               ,categoryorder = "array"
-                               ,categoryarray = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-                 )
+                  ,yaxis = list(title = ""
+                                ,categoryorder = "array"
+                                ,categoryarray = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+                  )
           ) # Close layout()
       ) # Close plotly_build()
     } # End for loop
@@ -604,7 +620,7 @@ server <- function(input, output, session) {
     # Create the subplot with shared colorscale
     ## heatmaps$plot_2020, heatmaps$plot_2021 are blank probably because of missing data
     plotly.calendar.heatmaps.ride.elevation.day.yearly <- plotly::subplot(
-       heatmaps$plot_2022
+      heatmaps$plot_2022
       ,heatmaps$plot_2023
       ,heatmaps$plot_2024
       ,nrows = 1
@@ -615,18 +631,18 @@ server <- function(input, output, session) {
         list(x = 0.1, y = 1.075, text = "2022", font = list(size = 20), showarrow = FALSE, xref = 'paper', yref = 'paper')
         ,list(x = 0.5, y = 1.075, text = "2023", font = list(size = 20), showarrow = FALSE, xref = 'paper', yref = 'paper')
         ,list(x = 0.9, y = 1.075, text = "2024", font = list(size = 20), showarrow = FALSE, xref = 'paper', yref = 'paper')
-        ) # Close list()
+      ) # Close list()
       ) %>%
       # Tweak first and second x axes to get a centre title 
       layout(
-         xaxis = list(title="", titlefont= list(size=20), showgrid=FALSE)
+        xaxis = list(title="", titlefont= list(size=20), showgrid=FALSE)
         ,xaxis2 = list(title="Week", titlefont= list(size=20))
-        )
+      )
     
     # Return the final plot
     plotly.calendar.heatmaps.ride.elevation.day.yearly
     
-    }) # End renderPlotly()
+  }) # End renderPlotly()
   
   #----------------------------------------------------------------------
   # Yearly cycling distance per weekday by plotly calendar heatmaps
@@ -718,17 +734,17 @@ server <- function(input, output, session) {
     colors.viridis <- viridis::viridis(number.years)
     
     lineplot.yearly.ride.cumulative.distance <- plotly::plot_ly(
-       data = ride.day
+      data = ride.day
       ,type = "scatter"
       ,mode = "lines+markers"
       ,x = ~start.dayofyear.local
       ,y = ~ride.distance.cum.year
       ,color = ~factor(start.year.local) # This maps color to each year
       ,colors = colors.viridis # Use viridis palette
-      ) %>%
+    ) %>%
       layout(xaxis = list(title = "Day of year", dtick=30)
              ,yaxis = list(title = "", tickformat=",")
-             )
+      )
     # Return the final plot
     lineplot.yearly.ride.cumulative.distance
   })
@@ -742,7 +758,7 @@ server <- function(input, output, session) {
     colors.viridis <- viridis::viridis(number.years)
     # Display colors
     scales::show_col(colors.viridis)
-
+    
     lineplot.yearly.ride.cumulative.elevation <- plotly::plot_ly(
       data = ride.day
       ,type = "scatter"
@@ -751,7 +767,7 @@ server <- function(input, output, session) {
       ,y = ~ride.elevation.cum.year
       ,color = ~factor(start.year.local) # This maps color to each year
       ,colors = colors.viridis # Use viridis palette
-      ) %>%
+    ) %>%
       layout(xaxis = list(title = "Day of year", dtick=30)
              ,yaxis = list(title = "", tickformat=",")
       )
@@ -770,7 +786,7 @@ server <- function(input, output, session) {
                     ,elevation.gain.m.day=format(round(elevation.gain.m.day, digits = 0), big.mark=",")
                     ,ride.distance.cum.year=format(round(ride.distance.cum.year, digits = 2), big.mark=",")
                     ,ride.elevation.cum.year=format(round(ride.elevation.cum.year, digits = 0), big.mark=",")
-                    ) %>%
+      ) %>%
       dplyr::select(start.date.local.start.weekday.local
                     ,start.dayofyear.local
                     ,activity.name.day
@@ -788,14 +804,14 @@ server <- function(input, output, session) {
     
     DT::datatable(ride.day.1
                   ,options = list(order=list(c(1, 'desc'),c(3, 'desc'))
-                                  )
-                  ) %>%
+                  )
+    ) %>%
       DT::formatStyle(
         columns = names(ride.day.1) # Apply to all columns
         # Use styleInterval to set alignment
         ,textAlign = styleInterval(0 # 0 represents the threshold value
                                    , c("left", "right") #values less than or equal to 0 will be left-aligned, and values greater than 0 will be right-aligned.
-                                   ) 
+        ) 
         , backgroundColor = styleEqual(0, "transparent")  # Optional: keeps background transparent
       )
     
@@ -803,19 +819,22 @@ server <- function(input, output, session) {
   #----------------------------
   # InfoBoxes
   #----------------------------
-  function.renderInfoBox(shiny_output = output, output.id = "infoBox.yearly.weekday.greatest.total.ride.number"
+  function.renderInfoBox(shiny_output = output
+                         ,output.id = "infoBox.yearly.weekday.greatest.total.ride.number"
                          ,arg.title="Most active weekday in"
                          ,arg.value=infobox.value.yearly.weekday.highest.ride.number
                          ,arg.icon = "chart-bar")
-  function.renderInfoBox(shiny_output = output, output.id = "infoBox.yearly.weekday.longest.total.ride.distance"
+  function.renderInfoBox(shiny_output = output
+                         ,output.id = "infoBox.yearly.weekday.longest.total.ride.distance"
                          ,arg.title="Most distance-productive weekday in"
                          ,arg.value=infobox.value.yearly.weekday.longest.ride.distance
                          ,arg.icon = "map")
-  function.renderInfoBox(shiny_output = output, output.id = "infoBox.yearly.weekday.best.total.ride.elevation"
+  function.renderInfoBox(shiny_output = output
+                         ,output.id = "infoBox.yearly.weekday.best.total.ride.elevation"
                          ,arg.title = "Most elevation-productive weekday in"
                          ,arg.value = infobox.value.yearly.weekday.greatest.ride.elevation
                          ,arg.icon = "arrow-up")
-
+  
 } # Close the server function
 
 #************************************************************************************************#
