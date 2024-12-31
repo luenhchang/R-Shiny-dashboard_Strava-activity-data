@@ -1,6 +1,10 @@
 # R Shiny Dashboard: Strava Activity Data
 
 ## Updates
+**2024-12-31**:
+* Included Lawn mowing in top left-aligned legend of Activity Hours in 2024 plot
+* Added Lawn mowing in activity.type in 2024 data
+
 **2024-12-19**:
 * Moved custom functions from `global.R` and `server.R` to `functions.R`
 * Sorted all DT dataTables by descending orders of Date and Activity

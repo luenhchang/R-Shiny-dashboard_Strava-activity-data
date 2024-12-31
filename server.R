@@ -225,15 +225,27 @@ server <- function(input, output, session) {
       ) %>%
       plotly::layout( xaxis=list(title="Date"
                                  ,titlefont= list(size=40)
-                                 ,tickmode = "array",  # Display custom tick marks
-                                 tickvals = unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), # Start of each month
+                                 ,tickmode = "array" # Display custom tick marks
+                                 ,tickvals = unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), # Start of each month
                                  ticktext = format(unique(lubridate::floor_date(data.moving.time.2024$start.date.local, "month")), "%b"), # Month abbreviations
                                  tickangle = 0
       )
       ,yaxis = list(title = 'Hours',titlefont= list(size=40))
       ,barmode = 'stack'
       # Left align hover text
-      ,hoverlabel = list(align = "left"))
+      ,hoverlabel = list(align = "left")
+      # Move legend to top and left-align it
+      ,legend = list(
+        orientation = "h"
+        ,x = 0
+        ,y = 1
+        ,xanchor = "left"
+        ,yanchor = "top"
+        ,font= list(size=20) # Increase legend text size
+        ,itemsizing= "constant"      # Ensure consistent symbol sizing
+        ,tracegroup=10 # Add spacing between groups in the legend
+      )
+      )
   })
   
   # Plot moving time in 2024 using ggplot2 as a static plot

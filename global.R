@@ -17,6 +17,8 @@
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2024-12-31 Lawn mowing included in top left-aligned legend of Activity hours in 2024 plot
+## 2024-12-31 Added Lawn mowing in activity.type.
 ## 2024-12-19 Moved all customed functions to functions.R
 ## 2024-11-27 Moved shinyapps.io account checking to check_shinyapps_io_accounts.R
 ## 2024-11-27 Moved Strava credentials to Strava_API_credentials.R
@@ -96,7 +98,7 @@ my_acts <- rStrava::get_activity_list( stoken
 act_data <- rStrava::compile_activities(my_acts) |>
   # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
   dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 947 52
+# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 953 52
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -151,9 +153,9 @@ poolswim.log <- googlesheets4::read_sheet(sheet_id
     Corrected_moving_time_duration=lubridate::as.duration(lubridate::hms(Corrected_moving_time))
     ,Corrected_distance_100meters=Corrected_distance_meters/100
     ,pace_mmss_per100meters=Corrected_moving_time_duration/Corrected_distance_100meters
-    ,pace_period=as.period(pace_mmss_per100meters)
-    ,pace_minutes=as.integer(minute(pace_period))
-    ,pace_seconds = as.integer(second(pace_period))
+    ,pace_period=lubridate::as.period(pace_mmss_per100meters)
+    ,pace_minutes=as.integer(lubridate::minute(pace_period))
+    ,pace_seconds = as.integer(lubridate::second(pace_period))
     ,pace_mmss_per100meters_fmt = sprintf("%02d:%02d", pace_minutes, pace_seconds)
     ,hovertext=paste(
       "Event Name :", Strava_activity_name, "\n"
@@ -162,13 +164,13 @@ poolswim.log <- googlesheets4::read_sheet(sheet_id
       ,"Laps and training : \n"
       ,gsub(x=Laps_training, pattern=";", replacement="\n")
     ) # End paste()
-  ) # dim(poolswim.log) 7 16
+  ) # dim(poolswim.log) 23 16
 
 # Authentication complete. Please close this page and return to R.
 poolswim.combined <- dplyr::left_join(
   x=poolswim.log
   ,y=poolswim[,c("name","start_date_local","average_heartrate", "max_heartrate")]
-  ,by=c("Strava_activity_name"="name") ) # dim(poolswim.combined) 22 19
+  ,by=c("Strava_activity_name"="name") ) # dim(poolswim.combined) 23 19
 
 #*****************************************
 # Read data to use under menuItem "Walk" 
@@ -195,7 +197,7 @@ walk <- act_data |>
                   ,"Distance :", distance, "km", "\n"
                   ,"Moving time :", moving_time_period, "\n"
                   ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-                ) # dim(walk) 69 14
+                ) # dim(walk) 73 14
 
 # Read a single activity of Walk from Strava using id
 ## [Retrieve streams for Strava activities, and convert to a dataframe](https://rdrr.io/cran/rStrava/man/get_activity_streams.html)
@@ -233,7 +235,7 @@ run <- act_data |>
       ,"Distance :", distance, "km", "\n"
       ,"Moving time :", moving_time_period, "\n"
       ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-  ) # dim(run) 17 16
+  ) # dim(run) 26 16
 
 # Plot average speed by splits for a single activity interval run
 # activity.11732270119 <- rStrava::get_spdsplits(
@@ -251,13 +253,10 @@ act_data.1 <- act_data %>%
      start.datetime.UTC=as.POSIXct(x=start_date, format ="%Y-%m-%dT%H:%M:%SZ", tz="GMT")
     ,start.date.UTC=lubridate::date(start.datetime.UTC)
     ,start.datetime.local=case_when(
-      start.date.UTC >= ymd('2023-01-16') & start.date.UTC <= ymd('2023-02-05')~
+      start.date.UTC >= lubridate::ymd('2023-01-16') & start.date.UTC <= lubridate::ymd('2023-02-05')~
         format(start.datetime.UTC, tz="Asia/Kuala_Lumpur",usetz=TRUE)
-        #as.POSIXct(start.datetime.UTC, tz="Asia/Kuala_Lumpur")
-      ,start.date.UTC >= ymd('2023-09-02') & start.date.UTC <= ymd('2023-10-02') ~ 
-        #as.POSIXct(start.datetime.UTC, tz="Asia/Taipei")
+      ,start.date.UTC >= lubridate::ymd('2023-09-02') & start.date.UTC <= lubridate::ymd('2023-10-02') ~ 
         format(start.datetime.UTC, tz="Asia/Taipei",usetz=TRUE)
-      #,TRUE ~ as.POSIXct(start.datetime.UTC, tz="Australia/Brisbane")
       ,TRUE ~ format(start.datetime.UTC, tz="Australia/Brisbane",usetz=TRUE)
       )
     ,start.date.local=lubridate::date(start.datetime.local)
@@ -272,7 +271,7 @@ act_data.1 <- act_data %>%
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
     ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 930 23
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 948 23
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
@@ -284,7 +283,7 @@ ride <- act_data.1 |>
   dplyr::mutate(
     # Convert seconds to lubridate duration
     ,moving_time_period=lubridate::seconds_to_period(moving_time)
-    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 321 16
+    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 327 16
 
 # Read single activity (not working)
 # activity.11826580247 <- rStrava::get_activity_streams(
@@ -320,7 +319,7 @@ ride.day <- ride %>%
   dplyr::group_by(start.year.local) %>%
   dplyr::arrange(start.date.local) %>%
   dplyr::mutate(ride.distance.cum.year = cumsum(distance.km.day)
-                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 307 11
+                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 313 11
 
 # Calculate total ride distance, elevation per weekday, year
 ride.weekday.year <- ride %>%
@@ -343,7 +342,7 @@ ride.year.highest.ride.count.weekday <- ride.weekday.year %>%
                                        " (", count.ride, " rides)")) # dim(ride.year.highest.ride.count.weekday) 5 6 # ride.year.highest.ride.count.weekday$infobox.value
 
 # Collapse all values into a single string with <br/> for line breaks
-infobox.value.yearly.weekday.highest.ride.number <- HTML(paste(ride.year.highest.ride.count.weekday$infobox.value, collapse = "<br/>"))
+infobox.value.yearly.weekday.highest.ride.number <- htmltools::HTML(paste(ride.year.highest.ride.count.weekday$infobox.value, collapse = "<br/>"))
 
 #-----------------------------------------------------
 # Find weekday with longest cycling distance in a year
@@ -357,7 +356,7 @@ ride.year.longest.ride.distance.weekday <- ride.weekday.year %>%
                                        " (", total.ride.distance.dayOfWeek, " km)")) # dim(ride.year.longest.ride.distance.weekday) 5 6
 
 # Collapse all values into a single string with <br/> for line breaks
-infobox.value.yearly.weekday.longest.ride.distance <- HTML(paste(ride.year.longest.ride.distance.weekday$infobox.value, collapse = "<br/>"))
+infobox.value.yearly.weekday.longest.ride.distance <- htmltools::HTML(paste(ride.year.longest.ride.distance.weekday$infobox.value, collapse = "<br/>"))
 
 #--------------------------------------------------------
 # Find weekday with best cycling elevation gain in a year
@@ -371,7 +370,7 @@ ride.year.greatest.ride.elevation.weekday <- ride.weekday.year %>%
                                        " (", total.ride.elevation.dayOfWeek, " m)")) # dim(ride.year.greatest.ride.elevation.weekday) 5 6
 
 # Collapse all values into a single string with <br/> for line breaks
-infobox.value.yearly.weekday.greatest.ride.elevation <- HTML(paste(ride.year.greatest.ride.elevation.weekday$infobox.value, collapse = "<br/>"))
+infobox.value.yearly.weekday.greatest.ride.elevation <- htmltools::HTML(paste(ride.year.greatest.ride.elevation.weekday$infobox.value, collapse = "<br/>"))
 
 #**********************************************
 # Read data to use under menuItem "Active time" 
@@ -397,10 +396,14 @@ activities.2023 <- act_data.1 %>%
 activities.2024 <- act_data.1 %>%
   dplyr::filter(start.year.local==2024) %>%
   dplyr::arrange(start.datetime.local) %>%
-  dplyr::mutate(activity.type=sport_type) # dim(activities.2024) 243 24
+  dplyr::mutate(activity.type= 
+                  dplyr::case_when(
+                    grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
+                    ,TRUE ~ sport_type)
+                )# dim(activities.2024) 249 24
 
 data.moving.time.2024 <- activities.2024 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 229 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 235 24
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
