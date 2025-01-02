@@ -98,7 +98,7 @@ my_acts <- rStrava::get_activity_list( stoken
 act_data <- rStrava::compile_activities(my_acts) |>
   # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
   dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 953 52
+# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 955 52
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -271,7 +271,7 @@ act_data.1 <- act_data %>%
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
     ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 948 23
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 955 23
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
@@ -376,6 +376,67 @@ infobox.value.yearly.weekday.greatest.ride.elevation <- htmltools::HTML(paste(ri
 # Read data to use under menuItem "Active time" 
 #**********************************************
 
+#--------------------------------------------------------------------------------------------
+# Find months that are most or least active in a year
+## Activeness is number of unique exercise days divided by number of days in the month * 100%
+#--------------------------------------------------------------------------------------------
+monthly.activeness.percentage <- act_data.1 %>%
+  dplyr::filter(start.year.local >= 2021) %>%
+  # Group by year and month
+  dplyr::group_by(start.year.local, start.month.local) %>%
+  # Summarize to one row per group
+  dplyr::summarise(
+    unique_days = dplyr::n_distinct(start.date.local), # Count unique exercise days
+    .groups = "drop" # Drop grouping structure to ensure clarity
+  ) %>%
+  # Add days_in_month calculation after summarizing
+  dplyr::mutate(
+    days_in_month = lubridate::days_in_month(as.Date(paste(start.year.local, start.month.local, "01", sep = "-"))),
+    percent.days.active = (unique_days / days_in_month) * 100
+  ) # dim(monthly.activeness.percentage) [1] 51  5
+
+most.active.months <- monthly.activeness.percentage %>%
+  # Group by year
+  dplyr::group_by(start.year.local) %>%
+  # Get the record with the highest percent.days.active per year
+  dplyr::slice_max(percent.days.active, n = 1) %>%
+  # Ungroup to remove grouping structure
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    # Convert numeric month to month name
+    start.month.local.name = lubridate::month(start.month.local, label = TRUE, abbr = FALSE)
+    ,infobox.value= paste0(start.year.local
+                           , " : "
+                           , start.month.local.name
+                           ," ("
+                           , round(percent.days.active, digits = 2)
+                           , "% of days with exercise)")
+  )# dim(most.active.months) [1] 6 7
+
+# Collapse all values into a single string with <br/> for line breaks
+infobox.value.most.active.months <- htmltools::HTML(paste(most.active.months$infobox.value, collapse = "<br/>"))
+
+least.active.months <- monthly.activeness.percentage %>%
+  # Group by year
+  dplyr::group_by(start.year.local) %>%
+  # Get the record with the highest percent.days.active per year
+  dplyr::slice_min(percent.days.active, n = 1) %>%
+  # Ungroup to remove grouping structure
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    # Convert numeric month to month name
+    start.month.local.name = lubridate::month(start.month.local, label = TRUE, abbr = FALSE)
+    ,infobox.value= paste0(start.year.local
+                           , " : "
+                           , start.month.local.name
+                           ," ("
+                           , round(percent.days.active, digits = 2)
+                           , "% of days with exercise)")
+  )# dim(most.active.months) [1] 6 7
+
+# Collapse all values into a single string with <br/> for line breaks
+infobox.value.least.active.months <- htmltools::HTML(paste(least.active.months$infobox.value, collapse = "<br/>"))
+
 #------------------
 # Process 2023 data 
 #------------------
@@ -404,6 +465,21 @@ activities.2024 <- act_data.1 %>%
 
 data.moving.time.2024 <- activities.2024 %>%  
   dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 235 24
+
+#------------------
+# Process 2025 data
+#------------------
+activities.2025 <- act_data.1 %>%
+  dplyr::filter(start.year.local==2025) %>%
+  dplyr::arrange(start.datetime.local) %>%
+  dplyr::mutate(activity.type= 
+                  dplyr::case_when(
+                    grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
+                    ,TRUE ~ sport_type)
+  )# dim(activities.2025) 1 24
+
+data.moving.time.2025 <- activities.2025 %>%  
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 1 24
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#

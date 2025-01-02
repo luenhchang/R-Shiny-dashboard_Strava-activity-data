@@ -179,7 +179,6 @@ server <- function(input, output, session) {
                           ,argument.value=round(proportion.days.active.2024, digits = 2) # 57.77
                           ,argument.subtitle="% days active")
   
-  
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.total.moving.hours.2024"
                           ,argument.value=paste(round(sum(activities.2024$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
@@ -329,6 +328,102 @@ server <- function(input, output, session) {
     return(barplot.daily.moving.time)
   }) # Close renderPlot()
   
+  #----------------
+  # 2025 valueBoxes
+  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+  #----------------
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.year.in.sport.2025"
+                          ,argument.value=unique(activities.2025$start.year.local)
+                          ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.number.days.active.2025"
+                          ,argument.value=length(unique(activities.2025$start.date.local)) # 275
+                          ,argument.subtitle="Days active")
+  
+  # Calculate proportion of days that were active considering the year is a current year or not
+  proportion.days.active.2025 <-  ifelse(
+    # Check if the year is a current year
+    is_current_year(unique(activities.2025$start.year.local))==TRUE
+    # Calculate proportion of days active for a current year
+    ,length(unique(activities.2025$start.date.local))/max(activities.2025$start.date.local.day.of.year)*100
+    # Calculate proportion of days active for a past year
+    ,length(unique(activities.2025$start.date.local))/days_in_year(unique(activities.2025$start.year.local))*100)
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.proportion.days.active.2025"
+                          ,argument.value=round(proportion.days.active.2025, digits = 2) # 57.77
+                          ,argument.subtitle="% days active")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.moving.hours.2025"
+                          ,argument.value=paste(round(sum(activities.2025$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
+                          ,argument.subtitle="Total active time")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.distance.2025"
+                          ,argument.value=paste(format(round(sum(activities.2025$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 275
+                          ,argument.subtitle="Total cycling distance")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.elevation.2025"
+                          ,argument.value=paste(format(round(sum(activities.2025$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
+                          ,argument.subtitle="Total cycling elevation gain")
+  
+  #--------------------------------------
+  # 2025 active hours daily using plotly
+  #--------------------------------------
+  # Plot moving time in 2025 using plotly as an interactive plot
+  output$plotly.stacked.barplot.activity.moving.time.2025 <- plotly::renderPlotly({
+    data.moving.time.2025 %>% 
+      plotly::plot_ly( x = ~start.date.local
+                       ,y = ~moving.time.hour
+                       ,type = 'bar'
+                       ,name = ~activity.type
+                       ,color = ~activity.type
+                       ,marker= marker_style
+                       ,hoverinfo="text"
+                       ,hovertext=paste(
+                         "Activity Name:",data.moving.time.2025$name
+                         ,"<br> Date :", paste0(
+                           format(data.moving.time.2025$start.date.local, format="%B %d")
+                           ," at "
+                           ,lubridate::hour(data.moving.time.2025$start.datetime.local)
+                           ,":"
+                           ,lubridate::minute(data.moving.time.2025$start.datetime.local)
+                         ) # Close paste()
+                         ,"<br> Active hours :", paste(format(round(data.moving.time.2025$moving.time.hour, digits = 2), nsmall=2),"h")
+                         ,"<br> Distance:", paste(
+                           format(round(data.moving.time.2025$distance.km, digits = 2), nsmall=2)
+                           ,"km")
+                       )
+      ) %>%
+      plotly::layout( xaxis=list(title="Date"
+                                 ,titlefont= list(size=40)
+                                 ,tickmode = "array" # Display custom tick marks
+                                 ,tickvals = unique(lubridate::floor_date(data.moving.time.2025$start.date.local, "month")), # Start of each month
+                                 ticktext = format(unique(lubridate::floor_date(data.moving.time.2025$start.date.local, "month")), "%b"), # Month abbreviations
+                                 tickangle = 0
+      )
+      ,yaxis = list(title = 'Hours',titlefont= list(size=40))
+      ,barmode = 'stack'
+      # Left align hover text
+      ,hoverlabel = list(align = "left")
+      # Move legend to top and left-align it
+      ,legend = list(
+        orientation = "h"
+        ,x = 0
+        ,y = 1
+        ,xanchor = "left"
+        ,yanchor = "top"
+        ,font= list(size=20) # Increase legend text size
+        ,itemsizing= "constant"      # Ensure consistent symbol sizing
+        ,tracegroup=10 # Add spacing between groups in the legend
+      )
+      )
+  })
+
   #---------------------------------
   # DT Table with daily active hours
   #---------------------------------
@@ -352,6 +447,22 @@ server <- function(input, output, session) {
         ,textAlign= styleInterval(0, c("left","right"))
       )
   })
+  
+  #----------------------------
+  # InfoBoxes
+  #----------------------------
+  function.renderInfoBox(shiny_output = output
+                         ,output.id = "infoBox.most.active.months"
+                         ,arg.title="Most Active Month in"
+                         ,arg.value=infobox.value.most.active.months
+                         ,arg.icon = "chart-bar")
+  
+  function.renderInfoBox(shiny_output = output
+                         ,output.id = "infoBox.least.active.months"
+                         ,arg.title="Least Active Month in"
+                         ,arg.value=infobox.value.least.active.months
+                         ,arg.icon = "chart-bar")
+  
   
   #*****************************************
   # Outputs to use under menuItem "Swim"

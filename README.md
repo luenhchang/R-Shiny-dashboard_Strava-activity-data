@@ -1,21 +1,5 @@
 # R Shiny Dashboard: Strava Activity Data
 
-## Updates
-**2024-12-31**:
-* Included Lawn mowing in top left-aligned legend of Activity Hours in 2024 plot
-* Added Lawn mowing in activity.type in 2024 data
-
-**2024-12-19**:
-* Moved custom functions from `global.R` and `server.R` to `functions.R`
-* Sorted all DT dataTables by descending orders of Date and Activity
-* Updated Plotly bar plot to show every month on the X axis
-* Changed `Moving time` from lubridate to character to keep 'xxH xxM xxS' format in DT dataTables
-
-**2024-11-04**
-* Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.
-
----
-
 ## Introduction
 This repository contains an interactive R Shiny application that connects to the Strava API to retrieve and visualise activity data from a single user. The app provides insights into activity trends, performance metrics, and much more in an engaging and user-friendly interface.
 
@@ -60,5 +44,26 @@ You can view the live app here: [Strava activity data](https://luenhchang.shinya
 ## Installation
 To run this application locally:
 1. Clone this repository:
-   ```bash
+```bash
    git clone https://github.com/luenhchang/R-Shiny-dashboard_Strava-activity-data.git
+```
+
+---
+
+## Updates
+**2025-01-02**:
+* Added stacked bar chart for active hours in 2025
+* Added most or least active months in 2 infoBoxes
+
+**2024-12-31**:
+* Included Lawn mowing in top left-aligned legend of Activity Hours in 2024 plot
+* Added Lawn mowing in activity.type in 2024 data
+
+**2024-12-19**:
+* Moved custom functions from `global.R` and `server.R` to `functions.R`
+* Sorted all DT dataTables by descending orders of Date and Activity
+* Updated Plotly bar plot to show every month on the X axis
+* Changed `Moving time` from lubridate to character to keep 'xxH xxM xxS' format in DT dataTables
+
+**2024-11-04**
+* Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.

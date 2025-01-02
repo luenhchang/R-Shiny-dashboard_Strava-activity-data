@@ -58,6 +58,20 @@ body <- shinydashboard::dashboardBody(
     shinydashboard::tabItem(
       tabName = "tabActiveTime"
       ,fluidRow(
+        shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2025", width = 2)
+      ) # End fluidRow()
+      ,fluidRow(
+        box(title="Active hours in 2025"
+            ,status = "primary"
+            ,solidHeader = TRUE
+            ,width = 12
+            ,plotly::plotlyOutput(outputId = "plotly.stacked.barplot.activity.moving.time.2025")
+        )
+      ) # End fluidRow()
+      ,fluidRow(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2024", width = 2)
@@ -93,7 +107,11 @@ body <- shinydashboard::dashboardBody(
             ,DT::dataTableOutput(outputId = "dataTable.activity.moving.time")
             )
         ) # End fluidRow()
-      ) # tabItem()
+      ,fluidRow(
+         shinydashboard::valueBoxOutput(outputId = "infoBox.most.active.months", width = 5)
+        ,shinydashboard::valueBoxOutput(outputId = "infoBox.least.active.months", width = 5)
+        ) # End fluidRow()
+      ) # End tabItem()
     
     #************************************
     # menuItem "Swim"
