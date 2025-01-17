@@ -5,9 +5,9 @@ account: luenhchang
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12344944
-bundleId: 9587089
+bundleId: 9663797
 url: https://luenhchang.shinyapps.io/Strava-activity-data/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: app-printscreens/moving-time-2023.png|app-printscreens/moving-time-2024.png|app-printscreens/Ride-2023-2024.png|app-printscreens/table_active-hours.png|app-printscreens/table_pool-swimming-data.png|chatGPT_code.R|check_shinyapps_io_accounts.R|README.md|Strava_API_credentials.R
+ignoredFiles: app-printscreens/moving-time-2023.png|app-printscreens/moving-time-2024.png|app-printscreens/Ride-2023-2024.png|app-printscreens/table_active-hours.png|app-printscreens/table_pool-swimming-data.png|chatGPT_code.R|check_shinyapps_io_accounts.R|data/activities.csv|export_Strava_activity_data.R|README.md|Strava-activities_2020.csv|Strava-activities_2020.tsv|Strava-activities_2021.csv|Strava-activities_2021.tsv|Strava-activities_2022.csv|Strava-activities_2022.tsv|Strava-activities_2023.csv|Strava-activities_2023.tsv|Strava-activities_2024.csv|Strava-activities_2024.tsv|Strava-activity-data.tsv|Strava_API_credentials.R|version-control.md

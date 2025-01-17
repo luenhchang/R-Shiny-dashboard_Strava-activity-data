@@ -51,6 +51,9 @@ To run this application locally:
 ---
 
 ## Updates
+**2025-01-18**:
+* Included Gardening in top left-aligned legend of Activity Hours in 2025 plot
+
 **2025-01-02**:
 * Added stacked bar chart for active hours in 2025
 * Added most or least active months in 2 infoBoxes

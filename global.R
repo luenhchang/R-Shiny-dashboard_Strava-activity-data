@@ -460,6 +460,7 @@ activities.2024 <- act_data.1 %>%
   dplyr::mutate(activity.type= 
                   dplyr::case_when(
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
+                    ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
                 )# dim(activities.2024) 249 24
 
@@ -475,6 +476,7 @@ activities.2025 <- act_data.1 %>%
   dplyr::mutate(activity.type= 
                   dplyr::case_when(
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
+                    ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
   )# dim(activities.2025) 1 24
 
