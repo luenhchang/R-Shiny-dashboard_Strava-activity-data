@@ -53,6 +53,7 @@ To run this application locally:
 ## Updates
 **2025-01-21**:
 * Created 3 valueBoxes for This Week Progress that mimics Strava's weekly progress dashboard in 2024
+* Wrote valueBox(subtitle=) argument in a column of the data.frame stats`
 
 **2025-01-18**:
 * Included Gardening in top left-aligned legend of Activity Hours in 2025 plot
