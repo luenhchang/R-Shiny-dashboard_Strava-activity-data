@@ -530,18 +530,79 @@ last_week_stats_long <- last_week_stats %>%
   mutate(week = "last")
 
 # Merge this week long and last week long
-stats <- merge(x=this_week_stats_long
-               ,y=last_week_stats_long
-               ,by = "metric"
-               ,suffixes = c("_this", "_last")) %>%
+stats <- merge(x = this_week_stats_long,
+               y = last_week_stats_long,
+               by = "metric",
+               suffixes = c("_this", "_last")) %>%
   # Calculate percentage change between this and last week
-  dplyr::mutate(change= round((value_this-value_last)/value_last *100
-                              , digits = 2)
+  dplyr::mutate(
+    value_this_formatted = case_when(
+       metric == "total_distance_km" ~ paste0((round(value_this, digits = 2))," km")
+      ,metric == "total_moving_time_hour" ~ {
+        # Convert value_this to hours and minutes format
+        hours <- floor(value_this)  # Whole hours
+        minutes <- round((value_this - hours) * 60)  # Remaining minutes
+        
+        # Conditionally format based on hours
+        dplyr::if_else(
+          hours >= 1, 
+          paste0(hours, "h ", minutes, "m"),
+          paste0(minutes, "m")  # If hours < 1, only show minutes
+        )
+      },
+      TRUE ~ as.character(value_this)  # For other metrics, keep value_this as is
+    ),
+    change = round(value_this - value_last, digits = 2),
+    change.formatted = case_when(
+      metric == "number_activities" ~ as.character(abs(value_this - value_last))
+      ,metric == "total_moving_time_hour" ~ {
+        # Calculate the difference in hours and convert to seconds
+        diff_seconds <- round((value_this - value_last) * 3600, 0)  # Convert to seconds
+        abs_seconds <- abs(diff_seconds)  # Absolute difference in seconds
+        hours <- abs_seconds %/% 3600  # Whole hours
+        minutes <- (abs_seconds %% 3600) %/% 60  # Remaining minutes
+        
+        # Use if_else for conditional formatting (vectorized)
+        dplyr::if_else(
+          hours > 0, 
+          paste0(hours, " h ", minutes, " m"), 
+          paste0(minutes, " m")
+        )
+      },
+      metric == "total_distance_km" ~ paste0(round(abs(value_this - value_last), 2), " km"),
+      TRUE ~ as.character(abs(change))  # Default case
+    ),
+    # argument expression to use in valueBox subtitle
+    subtitle = case_when(
+      metric == "number_activities" ~ paste0(
+        ifelse(change > 0, 
+               "<span style='color:green;'>&#9650;</span>",  # ▲ Upward triangle in green
+               ifelse(change < 0, 
+                      "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
+                      "<span style='color:gray;'>—</span>"         # Neutral dash in gray
+               )
+        ), " ", change.formatted),
+      metric == "total_moving_time_hour" ~ paste0(
+        ifelse(change > 0, 
+               "<span style='color:green;'>&#9650;</span>",  # ▲ Upward triangle in green
+               ifelse(change < 0, 
+                      "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
+                      "<span style='color:gray;'>—</span>"         # Neutral dash in gray
+               )
+               )
+        , " "
+        , change.formatted)
+      ,metric == "total_distance_km" ~ paste0(
+        ifelse(change > 0, 
+               "<span style='color:green;'>&#9650;</span>",  # ▲ Upward triangle in green
+               ifelse(change < 0, 
+                      "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
+                      "<span style='color:gray;'>—</span>"         # Neutral dash in gray
+               )
+        ), " ", change.formatted),
+      TRUE ~ "<span style='color:gray;'>—</span>"  # Default case for other metrics
+    )
   )
-
-# Convert to lists for use in valueBoxes
-this_week_list <- split(stats$value_this, stats$metric)
-change_list <- split(stats$change, stats$metric)
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#

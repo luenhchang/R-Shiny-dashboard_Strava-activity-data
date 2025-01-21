@@ -47,71 +47,52 @@ server <- function(input, output, session) {
   # Number of activities this week
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.this.week.progress.number.activities"
-                          ,argument.value=paste0(this_week_list$number_activities, " activities")
+                          ,argument.value=HTML(
+                            paste0(
+                              "Activities <br>"
+                              ,stats %>% filter(metric == "number_activities") %>% dplyr::pull(value_this_formatted)
+                            ) # Close paste0()
+                          ) # Close HTML()
                           ,argument.subtitle=HTML(paste0(
-                            round(change_list$number_activities, 1), "% ",
-                            # Compare this week with last week with a triangle
-                            ## This week better then an upward triangle in green
-                            ## This week worse then a downward triangle in red
-                            if (change_list$number_activities > 0) {
-                              "<span style='color:green;'>&#9650;</span>"  # ▲ Upward triangle in green
-                            } else if (change_list$number_activities < 0) {
-                              "<span style='color:red;'>&#9660;</span>"   # ▼ Downward triangle in red
-                            } else {
-                              "<span style='color:gray;'>—</span>"       # Neutral dash in gray
-                            }
+                            stats %>% filter(metric == "number_activities") %>% dplyr::pull(subtitle)
                           ))
                           ,argument.icon=icon("running")
                           ,argument.color="black" # Color argument still required but overridden with CSS
-                          ) # Close the function.renderValueBox()  
+                          ) # Close the function.renderValueBox()
   # Active hours this week
-  function.renderValueBox(shiny_output = output
-                          ,output.id="valueBox.this.week.progress.moving.hours"
-                          ,argument.value=paste0(
-                            round(this_week_list$total_moving_time_hour, digits = 2)
-                            , " hours")
-                          ,argument.subtitle=HTML(paste0(
-                            round(change_list$total_moving_time_hour, 1), "% ",
-                            # Compare this week with last week with a triangle
-                            ## This week better then an upward triangle in green
-                            ## This week worse then a downward triangle in red
-                            if (change_list$total_moving_time_hour > 0) {
-                              "<span style='color:green;'>&#9650;</span>"  # ▲ Upward triangle in green
-                            } else if (change_list$total_moving_time_hour < 0) {
-                              "<span style='color:red;'>&#9660;</span>"   # ▼ Downward triangle in red
-                            } else {
-                              "<span style='color:gray;'>—</span>"       # Neutral dash in gray
-                            }
-                          ))
-                          ,argument.icon=icon("clock")
-                          ,argument.color="black" # Color argument still required but overridden with CSS
-  ) # Close the function.renderValueBox()
-
+  function.renderValueBox(
+    shiny_output = output,
+    output.id = "valueBox.this.week.progress.moving.hours",
+    argument.value = HTML(
+      paste0(
+        "Time <br>"
+        ,stats %>% filter(metric == "total_moving_time_hour") %>% dplyr::pull(value_this_formatted)
+      ) # Close paste0()
+    ) # Close HTML()
+    ,argument.subtitle = HTML(paste0(
+      stats %>% filter(metric == "total_moving_time_hour") %>% dplyr::pull(subtitle)
+    ))
+    ,argument.icon = icon("clock")
+    ,argument.color = "black"  # Color argument still required but overridden with CSS
+  )
+  
   # Distance this week
-  function.renderValueBox(shiny_output = output
-                          ,output.id="valueBox.this.week.progress.distance"
-                          ,argument.value=paste0(
-                            round(this_week_list$total_distance_km, digits = 2)
-                            ," km")
-                          ,argument.subtitle=HTML(paste0(
-                            round(change_list$total_distance_km, 1), "% ",
-                            # Compare this week with last week with a triangle
-                            ## This week better then an upward triangle in green
-                            ## This week worse then a downward triangle in red
-                            if (change_list$total_distance_km > 0) {
-                              "<span style='color:green;'>&#9650;</span>"  # ▲ Upward triangle in green
-                            } else if (change_list$total_distance_km < 0) {
-                              "<span style='color:red;'>&#9660;</span>"   # ▼ Downward triangle in red
-                            } else {
-                              "<span style='color:gray;'>—</span>"       # Neutral dash in gray
-                            }
-                          ))
-                          ,argument.icon=icon("route")
-                          ,argument.color="black" # Color argument still required but overridden with CSS
-  ) # Close the function.renderValueBox()
-  
-  
-  
+  function.renderValueBox(
+    shiny_output = output
+    ,output.id = "valueBox.this.week.progress.distance"
+    ,argument.value = HTML(
+      paste0(
+        "Distance <br>"
+        ,stats %>% filter(metric == "total_distance_km") %>% dplyr::pull(value_this_formatted)
+      ) # Close paste0()
+    ) # Close HTML()
+    ,argument.subtitle = HTML(paste0(
+      stats %>% filter(metric == "total_distance_km") %>% dplyr::pull(subtitle)
+      ) # Close paste0()
+      ) # Close HTML()
+    ,argument.icon = icon("route")
+    ,argument.color = "black"  # Color argument still required but overridden with CSS
+  )
   
   #----------------
   # 2023 valueBoxes
