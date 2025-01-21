@@ -37,6 +37,82 @@ server <- function(input, output, session) {
   # Outputs to use under menuItem "Active Time"
   #**********************************************
   
+  #-----------------------------
+  # This week progress dashboard
+  ## 3 valueBoxes- 
+  ## (1) Number of activities this week
+  ## (2) Distance
+  ## (3) Hours
+  #-----------------------------
+  # Number of activities this week
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.this.week.progress.number.activities"
+                          ,argument.value=paste0(this_week_list$number_activities, " activities")
+                          ,argument.subtitle=HTML(paste0(
+                            round(change_list$number_activities, 1), "% ",
+                            # Compare this week with last week with a triangle
+                            ## This week better then an upward triangle in green
+                            ## This week worse then a downward triangle in red
+                            if (change_list$number_activities > 0) {
+                              "<span style='color:green;'>&#9650;</span>"  # ▲ Upward triangle in green
+                            } else if (change_list$number_activities < 0) {
+                              "<span style='color:red;'>&#9660;</span>"   # ▼ Downward triangle in red
+                            } else {
+                              "<span style='color:gray;'>—</span>"       # Neutral dash in gray
+                            }
+                          ))
+                          ,argument.icon=icon("running")
+                          ,argument.color="black" # Color argument still required but overridden with CSS
+                          ) # Close the function.renderValueBox()  
+  # Active hours this week
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.this.week.progress.moving.hours"
+                          ,argument.value=paste0(
+                            round(this_week_list$total_moving_time_hour, digits = 2)
+                            , " hours")
+                          ,argument.subtitle=HTML(paste0(
+                            round(change_list$total_moving_time_hour, 1), "% ",
+                            # Compare this week with last week with a triangle
+                            ## This week better then an upward triangle in green
+                            ## This week worse then a downward triangle in red
+                            if (change_list$total_moving_time_hour > 0) {
+                              "<span style='color:green;'>&#9650;</span>"  # ▲ Upward triangle in green
+                            } else if (change_list$total_moving_time_hour < 0) {
+                              "<span style='color:red;'>&#9660;</span>"   # ▼ Downward triangle in red
+                            } else {
+                              "<span style='color:gray;'>—</span>"       # Neutral dash in gray
+                            }
+                          ))
+                          ,argument.icon=icon("clock")
+                          ,argument.color="black" # Color argument still required but overridden with CSS
+  ) # Close the function.renderValueBox()
+
+  # Distance this week
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.this.week.progress.distance"
+                          ,argument.value=paste0(
+                            round(this_week_list$total_distance_km, digits = 2)
+                            ," km")
+                          ,argument.subtitle=HTML(paste0(
+                            round(change_list$total_distance_km, 1), "% ",
+                            # Compare this week with last week with a triangle
+                            ## This week better then an upward triangle in green
+                            ## This week worse then a downward triangle in red
+                            if (change_list$total_distance_km > 0) {
+                              "<span style='color:green;'>&#9650;</span>"  # ▲ Upward triangle in green
+                            } else if (change_list$total_distance_km < 0) {
+                              "<span style='color:red;'>&#9660;</span>"   # ▼ Downward triangle in red
+                            } else {
+                              "<span style='color:gray;'>—</span>"       # Neutral dash in gray
+                            }
+                          ))
+                          ,argument.icon=icon("route")
+                          ,argument.color="black" # Color argument still required but overridden with CSS
+  ) # Close the function.renderValueBox()
+  
+  
+  
+  
   #----------------
   # 2023 valueBoxes
   # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.

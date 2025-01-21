@@ -483,6 +483,66 @@ activities.2025 <- act_data.1 %>%
 data.moving.time.2025 <- activities.2025 %>%  
   dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 1 24
 
+#-------------------------------------------------------------------
+# Create data for this week progress dashboard like Strava's in 2024
+#-------------------------------------------------------------------
+# Get the current date
+current_date <- Sys.Date()
+
+# Calculate the start of this week (Sunday) and last week (Sunday of the previous week)
+start_of_this_week <- current_date - as.integer(format(current_date, "%u")) + 1
+start_of_last_week <- start_of_this_week - 7
+
+# Extract this week's data
+this_week_stats <- act_data.1 %>%
+  filter(start.date.local >= start_of_this_week) %>%
+  summarise(
+    total_distance_km = sum(distance.km, na.rm = TRUE)
+    ,total_moving_time_hour = sum(moving.time.hour, na.rm = TRUE)
+    ,number_activities = n()  # Count the number of activities
+  ) %>%
+  replace(is.na(.), 0)
+
+# Reshape data to long format
+this_week_stats_long <- this_week_stats %>% 
+  tidyr::pivot_longer(
+    cols = c(total_distance_km, total_moving_time_hour, number_activities)
+    ,names_to = "metric"
+    ,values_to = "value") %>%
+  mutate(week = "this")
+
+# Extract last week's data
+last_week_stats <- act_data.1 %>%
+  filter(start.date.local >= start_of_last_week & start.date.local < start_of_this_week) %>%
+  summarise(
+    total_distance_km = sum(distance.km, na.rm = TRUE)
+    ,total_moving_time_hour = sum(moving.time.hour, na.rm = TRUE)
+    ,number_activities = n()  # Count the number of activities
+  ) %>%
+  replace(is.na(.), 0)
+
+# Reshape data to long format
+last_week_stats_long <- last_week_stats %>%
+  tidyr::pivot_longer(
+    cols = c(total_distance_km, total_moving_time_hour, number_activities)
+    ,names_to = "metric"
+    ,values_to = "value") %>%
+  mutate(week = "last")
+
+# Merge this week long and last week long
+stats <- merge(x=this_week_stats_long
+               ,y=last_week_stats_long
+               ,by = "metric"
+               ,suffixes = c("_this", "_last")) %>%
+  # Calculate percentage change between this and last week
+  dplyr::mutate(change= round((value_this-value_last)/value_last *100
+                              , digits = 2)
+  )
+
+# Convert to lists for use in valueBoxes
+this_week_list <- split(stats$value_this, stats$metric)
+change_list <- split(stats$change, stats$metric)
+
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
 #************************************************************************************************#

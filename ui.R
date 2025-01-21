@@ -50,6 +50,12 @@ sidebar <- shinydashboard::dashboardSidebar(
   ) # Close sidebarMenu()
 )
 
+# Level 1 header style
+style.header <- "text-align: left; padding-bottom: 10px; 
+                 font-family: 'Roboto', sans-serif; 
+                 font-weight: bold; 
+                 color: #000000;"  # Pure black without text shadow
+
 body <- shinydashboard::dashboardBody(
   shinydashboard::tabItems(
     #************************************
@@ -58,7 +64,22 @@ body <- shinydashboard::dashboardBody(
     shinydashboard::tabItem(
       tabName = "tabActiveTime"
       ,fluidRow(
-        shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2025", width = 2)
+        # Add a title row left-aligned
+        column(
+          width = 12,
+          tags$h1("This Week Progress", style = style.header)
+          )
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.number.activities", width = 3)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.moving.hours", width = 3)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.distance", width = 3)
+      )
+      ,fluidRow(
+        # Add a title row left-aligned
+        column(
+          width = 12,
+          tags$h1("This Year Progress", style = style.header)
+        )
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2025", width = 2)
@@ -72,7 +93,12 @@ body <- shinydashboard::dashboardBody(
         )
       ) # End fluidRow()
       ,fluidRow(
-         shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
+        # Add a title row left-aligned
+        column(
+          width = 12,
+          tags$h1("Past Year Progress", style = style.header)
+        )
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
