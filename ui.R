@@ -67,9 +67,10 @@ body <- shinydashboard::dashboardBody(
         # Add a title row left-aligned
         column(
           width = 12,
-          tags$h1("This Week Progress", style = style.header)
+          tags$h1("This Week's Fitness Highlights", style = style.header)
           )
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.number.activities", width = 3)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.elapsed.hours", width = 3)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.moving.hours", width = 3)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.distance", width = 3)
       )

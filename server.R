@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-01-22 Added total elapsed hours valueBox to This Week's Progress
 ## 2024-12-19 Moved all customed functions to functions.R
 ## 2024-11-04 Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.
 ## 2024-06-04 Added plotly bar plot subplots, one per food category. Currently no control on bar color and subplot titles
@@ -59,13 +60,30 @@ server <- function(input, output, session) {
                           ,argument.icon=icon("running")
                           ,argument.color="black" # Color argument still required but overridden with CSS
                           ) # Close the function.renderValueBox()
+  # Elapsed time this week
+  function.renderValueBox(
+    shiny_output = output
+    ,output.id = "valueBox.this.week.progress.elapsed.hours"
+    ,argument.value = HTML(
+      paste0(
+        "Elapsed Time <br>"
+        ,stats %>% filter(metric == "total_elapsed_time_hour") %>% dplyr::pull(value_this_formatted)
+      ) # Close paste0()
+    ) # Close HTML()
+    ,argument.subtitle = HTML(paste0(
+      stats %>% filter(metric == "total_elapsed_time_hour") %>% dplyr::pull(subtitle)
+    ))
+    ,argument.icon = icon("clock")
+    ,argument.color = "black"  # Color argument still required but overridden with CSS
+  )
+  
   # Active hours this week
   function.renderValueBox(
-    shiny_output = output,
-    output.id = "valueBox.this.week.progress.moving.hours",
-    argument.value = HTML(
+    shiny_output = output
+    ,output.id = "valueBox.this.week.progress.moving.hours"
+    ,argument.value = HTML(
       paste0(
-        "Time <br>"
+        "Active Time <br>"
         ,stats %>% filter(metric == "total_moving_time_hour") %>% dplyr::pull(value_this_formatted)
       ) # Close paste0()
     ) # Close HTML()

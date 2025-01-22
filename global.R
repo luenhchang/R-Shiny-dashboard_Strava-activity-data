@@ -498,6 +498,7 @@ this_week_stats <- act_data.1 %>%
   filter(start.date.local >= start_of_this_week) %>%
   summarise(
     total_distance_km = sum(distance.km, na.rm = TRUE)
+    ,total_elapsed_time_hour= sum(elapsed.time.hour, na.rm = TRUE)
     ,total_moving_time_hour = sum(moving.time.hour, na.rm = TRUE)
     ,number_activities = n()  # Count the number of activities
   ) %>%
@@ -506,7 +507,7 @@ this_week_stats <- act_data.1 %>%
 # Reshape data to long format
 this_week_stats_long <- this_week_stats %>% 
   tidyr::pivot_longer(
-    cols = c(total_distance_km, total_moving_time_hour, number_activities)
+    cols = c(total_distance_km,total_elapsed_time_hour, total_moving_time_hour, number_activities)
     ,names_to = "metric"
     ,values_to = "value") %>%
   mutate(week = "this")
@@ -516,6 +517,7 @@ last_week_stats <- act_data.1 %>%
   filter(start.date.local >= start_of_last_week & start.date.local < start_of_this_week) %>%
   summarise(
     total_distance_km = sum(distance.km, na.rm = TRUE)
+    ,total_elapsed_time_hour= sum(elapsed.time.hour, na.rm = TRUE)
     ,total_moving_time_hour = sum(moving.time.hour, na.rm = TRUE)
     ,number_activities = n()  # Count the number of activities
   ) %>%
@@ -524,7 +526,7 @@ last_week_stats <- act_data.1 %>%
 # Reshape data to long format
 last_week_stats_long <- last_week_stats %>%
   tidyr::pivot_longer(
-    cols = c(total_distance_km, total_moving_time_hour, number_activities)
+    cols = c(total_distance_km,total_elapsed_time_hour, total_moving_time_hour, number_activities)
     ,names_to = "metric"
     ,values_to = "value") %>%
   mutate(week = "last")
@@ -534,16 +536,17 @@ stats <- merge(x = this_week_stats_long,
                y = last_week_stats_long,
                by = "metric",
                suffixes = c("_this", "_last")) %>%
-  # Calculate percentage change between this and last week
+  # Calculate changes between this and last week
   dplyr::mutate(
     value_this_formatted = case_when(
        metric == "total_distance_km" ~ paste0((round(value_this, digits = 2))," km")
-      ,metric == "total_moving_time_hour" ~ {
+      #,metric == "total_moving_time_hour" ~ {
+      ,metric %in% c("total_elapsed_time_hour","total_moving_time_hour")  ~ {
         # Convert value_this to hours and minutes format
         hours <- floor(value_this)  # Whole hours
         minutes <- round((value_this - hours) * 60)  # Remaining minutes
         
-        # Conditionally format based on hours
+        # Conditionally format time unit based on hours
         dplyr::if_else(
           hours >= 1, 
           paste0(hours, "h ", minutes, "m"),
@@ -552,10 +555,14 @@ stats <- merge(x = this_week_stats_long,
       },
       TRUE ~ as.character(value_this)  # For other metrics, keep value_this as is
     ),
-    change = round(value_this - value_last, digits = 2),
-    change.formatted = case_when(
+    # Calculate numeric changes 
+    change = round(value_this - value_last, digits = 2)
+    
+    # Create character changes to use in valueBoxes
+    ,change.formatted = case_when(
       metric == "number_activities" ~ as.character(abs(value_this - value_last))
-      ,metric == "total_moving_time_hour" ~ {
+      #,metric == "total_moving_time_hour" ~ {
+      ,metric %in% c("total_elapsed_time_hour","total_moving_time_hour")  ~ {
         # Calculate the difference in hours and convert to seconds
         diff_seconds <- round((value_this - value_last) * 3600, 0)  # Convert to seconds
         abs_seconds <- abs(diff_seconds)  # Absolute difference in seconds
@@ -582,7 +589,8 @@ stats <- merge(x = this_week_stats_long,
                       "<span style='color:gray;'>—</span>"         # Neutral dash in gray
                )
         ), " ", change.formatted),
-      metric == "total_moving_time_hour" ~ paste0(
+      #metric == "total_moving_time_hour" ~ paste0(
+       metric %in% c("total_elapsed_time_hour","total_moving_time_hour") ~ paste0(  
         ifelse(change > 0, 
                "<span style='color:green;'>&#9650;</span>",  # ▲ Upward triangle in green
                ifelse(change < 0, 
@@ -599,8 +607,8 @@ stats <- merge(x = this_week_stats_long,
                       "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
                       "<span style='color:gray;'>—</span>"         # Neutral dash in gray
                )
-        ), " ", change.formatted),
-      TRUE ~ "<span style='color:gray;'>—</span>"  # Default case for other metrics
+        ), " ", change.formatted)
+      ,TRUE ~ "<span style='color:gray;'>—</span>"  # Default case for other metrics
     )
   )
 

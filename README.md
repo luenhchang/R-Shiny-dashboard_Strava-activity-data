@@ -51,6 +51,9 @@ To run this application locally:
 ---
 
 ## Updates
+**2025-01-22**:
+* Added total elapsed hours valueBox to This Week's Progress
+
 **2025-01-21**:
 * Created 3 valueBoxes for This Week Progress that mimics Strava's weekly progress dashboard in 2024
 * Wrote valueBox(subtitle=) argument in a column of the data.frame stats`
