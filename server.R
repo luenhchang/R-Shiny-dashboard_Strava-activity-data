@@ -42,8 +42,9 @@ server <- function(input, output, session) {
   # This week progress dashboard
   ## 3 valueBoxes- 
   ## (1) Number of activities this week
-  ## (2) Distance
-  ## (3) Hours
+  ## (2) Elapsed time
+  ## (3) Active time
+  ## (4) Distance
   #-----------------------------
   # Number of activities this week
   function.renderValueBox(shiny_output = output
@@ -504,12 +505,16 @@ server <- function(input, output, session) {
   #---------------------------------
   output$dataTable.activity.moving.time <- DT::renderDataTable({
     act_data.2 <- act_data.1 %>% 
-      dplyr::select(start.date.local, name, sport_type, moving.time.hour, average_heartrate, max_heartrate) %>%
-      dplyr::mutate(moving.time.hour=round(moving.time.hour, digits = 2)) %>%
+      dplyr::select(start.date.local, name, sport_type,elapsed.time.hour, moving.time.hour, average_heartrate, max_heartrate) %>%
+      dplyr::mutate(
+        elapsed.time.hour=round(elapsed.time.hour, digits = 2)
+        ,moving.time.hour=round(moving.time.hour, digits = 2)
+        ) %>%
       dplyr::rename(Date=start.date.local
                     ,Activity=name
                     ,`Sport type`=sport_type
-                    ,`Active hours`=moving.time.hour
+                    ,`Elapsed hours`= elapsed.time.hour
+                    ,`Active hours`= moving.time.hour
                     ,`Averaged heart rate`= average_heartrate
                     ,`Max heart rate`=max_heartrate) # dim(act_data.2) 924 6
     
