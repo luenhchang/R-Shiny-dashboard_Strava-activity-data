@@ -51,6 +51,10 @@ To run this application locally:
 ---
 
 ## Updates
+**2025-02-03**:
+* Sorted data by start.date.local and start.datetime.local to ensure correct stacking order in Plotly stacked bar chart of daily active hour in 2025 in server.R
+* Replaced `DT::dataTableOutput()` with `DT::DTOutput()` in ui.R
+
 **2025-01-24**:
 * Added elapsed hours to active time tab table
 

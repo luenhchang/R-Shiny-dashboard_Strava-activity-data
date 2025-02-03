@@ -478,10 +478,10 @@ activities.2025 <- act_data.1 %>%
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
-  )# dim(activities.2025) 1 24
+  )# dim(activities.2025) 31 24
 
 data.moving.time.2025 <- activities.2025 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 1 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 31 24
 
 #-------------------------------------------------------------------
 # Create data for this week progress dashboard like Strava's in 2024

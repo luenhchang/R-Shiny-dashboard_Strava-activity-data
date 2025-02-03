@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-02-03 Sorted data by start.date.local and start.datetime.local to ensure correct stacking order in Plotly stacked bar chart of daily active hour in 2025
 ## 2025-01-22 Added total elapsed hours valueBox to This Week's Progress
 ## 2024-12-19 Moved all customed functions to functions.R
 ## 2024-11-04 Calculated proportion of days with active hours in a current year or past year. This proportion is ranged between 0 and 100% considering if the year is a leap year.
@@ -452,52 +453,96 @@ server <- function(input, output, session) {
   #--------------------------------------
   # Plot moving time in 2025 using plotly as an interactive plot
   output$plotly.stacked.barplot.activity.moving.time.2025 <- plotly::renderPlotly({
-    data.moving.time.2025 %>% 
-      plotly::plot_ly( x = ~start.date.local
-                       ,y = ~moving.time.hour
-                       ,type = 'bar'
-                       ,name = ~activity.type
-                       ,color = ~activity.type
-                       ,marker= marker_style
-                       ,hoverinfo="text"
-                       ,hovertext=paste(
-                         "Activity Name:",data.moving.time.2025$name
-                         ,"<br> Date :", paste0(
-                           format(data.moving.time.2025$start.date.local, format="%B %d")
-                           ," at "
-                           ,lubridate::hour(data.moving.time.2025$start.datetime.local)
-                           ,":"
-                           ,lubridate::minute(data.moving.time.2025$start.datetime.local)
-                         ) # Close paste()
-                         ,"<br> Active hours :", paste(format(round(data.moving.time.2025$moving.time.hour, digits = 2), nsmall=2),"h")
-                         ,"<br> Distance:", paste(
-                           format(round(data.moving.time.2025$distance.km, digits = 2), nsmall=2)
-                           ,"km")
-                       )
+    
+    # Sort data by date and start time
+    ## # Preserve order
+    sorted_data <- data.moving.time.2025 %>%
+      dplyr::arrange(start.date.local, start.datetime.local) %>% 
+      dplyr::mutate(activity.type = factor(activity.type, levels = unique(activity.type))) # dim(sorted_data) 31 24
+    
+    plotly::plot_ly(
+      data = sorted_data
+      ,x = ~start.date.local
+      ,y = ~moving.time.hour
+      ,type = 'bar'
+      ,name = ~activity.type
+      ,color = ~activity.type
+      ,marker = marker_style
+      ,hoverinfo = "text"
+      ,hovertext = paste(
+        "Activity Name:", sorted_data$name
+        ,"<br> Date :", paste0(format(sorted_data$start.date.local, format="%B %d")," at ", lubridate::hour(sorted_data$start.datetime.local),":", lubridate::minute(sorted_data$start.datetime.local))
+        ,"<br> Active hours :", paste(format(round(sorted_data$moving.time.hour, digits = 2), nsmall=2), "h")
+        ,"<br> Distance:", paste(format(round(sorted_data$distance.km, digits = 2), nsmall=2), "km"))
       ) %>%
-      plotly::layout( xaxis=list(title="Date"
-                                 ,titlefont= list(size=40)
-                                 ,tickmode = "array" # Display custom tick marks
-                                 ,tickvals = unique(lubridate::floor_date(data.moving.time.2025$start.date.local, "month")), # Start of each month
-                                 ticktext = format(unique(lubridate::floor_date(data.moving.time.2025$start.date.local, "month")), "%b"), # Month abbreviations
-                                 tickangle = 0
-      )
-      ,yaxis = list(title = 'Hours',titlefont= list(size=40))
-      ,barmode = 'stack'
-      # Left align hover text
-      ,hoverlabel = list(align = "left")
-      # Move legend to top and left-align it
-      ,legend = list(
-        orientation = "h"
-        ,x = 0
-        ,y = 1
-        ,xanchor = "left"
-        ,yanchor = "top"
-        ,font= list(size=20) # Increase legend text size
-        ,itemsizing= "constant"      # Ensure consistent symbol sizing
-        ,tracegroup=10 # Add spacing between groups in the legend
-      )
-      )
+      plotly::layout(
+        xaxis = list(
+          title = "Date"
+          ,titlefont = list(size=40)
+          ,tickmode = "array"
+          ,tickvals = unique(lubridate::floor_date(sorted_data$start.date.local, "month"))
+          ,ticktext = format(unique(lubridate::floor_date(sorted_data$start.date.local, "month")), "%b")
+          ,tickangle = 0)
+        ,yaxis = list(title = 'Hours', titlefont = list(size=40))
+        ,barmode = 'stack'
+        ,hoverlabel = list(align = "left")
+        ,legend = list(
+          orientation = "h"
+          ,x = 0
+          ,y = 1
+          ,xanchor = "left"
+          ,yanchor = "top"
+          ,font = list(size=20)
+          ,itemsizing = "constant"
+          ,tracegroup = 10)
+        ) # End layout()
+    
+    # data.moving.time.2025 %>% 
+    #   plotly::plot_ly( x = ~start.date.local
+    #                    ,y = ~moving.time.hour
+    #                    ,type = 'bar'
+    #                    ,name = ~activity.type
+    #                    ,color = ~activity.type
+    #                    ,marker= marker_style
+    #                    ,hoverinfo="text"
+    #                    ,hovertext=paste(
+    #                      "Activity Name:",data.moving.time.2025$name
+    #                      ,"<br> Date :", paste0(
+    #                        format(data.moving.time.2025$start.date.local, format="%B %d")
+    #                        ," at "
+    #                        ,lubridate::hour(data.moving.time.2025$start.datetime.local)
+    #                        ,":"
+    #                        ,lubridate::minute(data.moving.time.2025$start.datetime.local)
+    #                      ) # Close paste()
+    #                      ,"<br> Active hours :", paste(format(round(data.moving.time.2025$moving.time.hour, digits = 2), nsmall=2),"h")
+    #                      ,"<br> Distance:", paste(
+    #                        format(round(data.moving.time.2025$distance.km, digits = 2), nsmall=2)
+    #                        ,"km")
+    #                    )
+    #   ) %>%
+    #   plotly::layout( xaxis=list(title="Date"
+    #                              ,titlefont= list(size=40)
+    #                              ,tickmode = "array" # Display custom tick marks
+    #                              ,tickvals = unique(lubridate::floor_date(data.moving.time.2025$start.date.local, "month")), # Start of each month
+    #                              ticktext = format(unique(lubridate::floor_date(data.moving.time.2025$start.date.local, "month")), "%b"), # Month abbreviations
+    #                              tickangle = 0
+    #   )
+    #   ,yaxis = list(title = 'Hours',titlefont= list(size=40))
+    #   ,barmode = 'stack'
+    #   # Left align hover text
+    #   ,hoverlabel = list(align = "left")
+    #   # Move legend to top and left-align it
+    #   ,legend = list(
+    #     orientation = "h"
+    #     ,x = 0
+    #     ,y = 1
+    #     ,xanchor = "left"
+    #     ,yanchor = "top"
+    #     ,font= list(size=20) # Increase legend text size
+    #     ,itemsizing= "constant"      # Ensure consistent symbol sizing
+    #     ,tracegroup=10 # Add spacing between groups in the legend
+    #   )
+    #   )
   })
 
   #---------------------------------

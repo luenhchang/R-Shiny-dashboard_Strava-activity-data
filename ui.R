@@ -41,7 +41,6 @@ sidebar <- shinydashboard::dashboardSidebar(
     # Change font size to 30
     ## Reference [shinydashboard: change font size of menuItem in sidebarMenu [duplicate]](https://stackoverflow.com/questions/53559195/shinydashboard-change-font-size-of-menuitem-in-sidebarmenu)
     tags$style(HTML(".sidebar-menu li a { font-size: 20px; }"))
-    #,shinydashboard::menuItem(text = "About", tabName = "tabAbout",icon = icon("home",lib = "glyphicon"))
     ,shinydashboard::menuItem(text = "Active Time", tabName = "tabActiveTime", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Swim", tabName = "tabSwim", icon = icon("chart-line"))
     ,shinydashboard::menuItem(text = "Walk", tabName = "tabWalk", icon = icon("chart-line"))
@@ -131,7 +130,7 @@ body <- shinydashboard::dashboardBody(
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            ,DT::dataTableOutput(outputId = "dataTable.activity.moving.time")
+            ,DT::DTOutput(outputId = "dataTable.activity.moving.time")
             )
         ) # End fluidRow()
       ,fluidRow(
@@ -258,7 +257,7 @@ body <- shinydashboard::dashboardBody(
             ,status = "primary"
             ,solidHeader = TRUE
             ,width = 12
-            ,DT::dataTableOutput(outputId = "dataTable.cumulative.total.ride.distance.elevation.aggregated.by.day")
+            ,DT::DTOutput(outputId = "dataTable.cumulative.total.ride.distance.elevation.aggregated.by.day")
             )
         ) # Close fluidRow()
       ,fluidRow(
