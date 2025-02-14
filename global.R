@@ -612,6 +612,41 @@ stats <- merge(x = this_week_stats_long,
     )
   )
 
+#------------------------------
+# Match gear name with URL
+## gear_id is the last part of a gear URL (e.g., https://www.strava.com/bikes/14034037 matches b14034037, Merida Scultura Endurance 6000 49cm)
+#------------------------------
+gear.bikes <- data.frame(gear_URL=c( "https://www.strava.com/bikes/14034037"
+                              ,"https://www.strava.com/bikes/10387460"
+                              ,"https://www.strava.com/bikes/14034016"
+                              ,"https://www.strava.com/bikes/10550734")
+                   ,gear_name=c( "Merida Scultura Endurance 6000 49cm"
+                                ,"Merida_Ride400"
+                                ,"Segway Ninebot MAX G30"
+                                ,"Vsett 10+"))
+
+# Go to individual activities and match shoes with their gear_id
+gear.shoes <- data.frame(gear_id=c( "g12002111"
+                                   ,"g12002118"
+                                   ,"g12002120"
+                                   ,"g12002112"
+                                   ,"g12002102"
+                                   ,"g12002113"
+                                   ,"g12002093"
+                                   ,"g17856474"
+                                   ,"g12002108"
+                                   ,"g14939278")
+                         ,gear_name=c( "Mizuno Wave Inspire 13"
+                                      ,"Mizuno Wave Ascend 7"
+                                      ,"Mizuno Wave Daichi 4"
+                                      ,"Mizuno WAVE ULTIMA 3"
+                                      ,"Mizuno Wave Inspire 15"
+                                      ,"Mizuno Wave Rider 20"
+                                      ,"Mizuno Wave Sayonara"
+                                      ,"Unbranded Kangaroo leather shoes"
+                                      ,"Mizuno wave alchemy 7"
+                                      ,"Unbranded Perrieri"))
+
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
 #************************************************************************************************#
