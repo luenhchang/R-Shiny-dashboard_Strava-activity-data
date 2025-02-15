@@ -72,7 +72,34 @@ body <- shinydashboard::dashboardBody(
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.elapsed.hours", width = 3)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.moving.hours", width = 3)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.distance", width = 3)
-      )
+      ) # Close fluidRow()
+      ,fluidRow(
+        # Add a title row left-aligned
+        column(
+          width = 12,
+          tags$h1("Running Shoe Usage: Distance, Elapsed Time & Moving Time", style = style.header)
+          )
+        ) # Close fluidRow()
+        ,fluidRow(
+          box(title="Shoe used total distance km"
+              ,status = "primary"
+              ,solidHeader = TRUE
+              ,width = 4
+              ,plotly::plotlyOutput(outputId = "plotly.horizontal.bars.shoe.usage.total.distance.km")
+              )
+          ,box(title="Shoe used total elapsed hours"
+               ,status = "primary"
+               ,solidHeader = TRUE
+               ,width = 4
+               ,plotly::plotlyOutput(outputId = "plotly.horizontal.bars.shoe.usage.total.elapsed.time.hour")
+               )
+          ,box(title="Shoe used total moving hours"
+               ,status = "primary"
+               ,solidHeader = TRUE
+               ,width = 4
+               ,plotly::plotlyOutput(outputId = "plotly.horizontal.bars.shoe.usage.total.moving.time.hour")
+               )
+        ) # Close fluidRow()
       ,fluidRow(
         # Add a title row left-aligned
         column(
@@ -90,7 +117,7 @@ body <- shinydashboard::dashboardBody(
             ,solidHeader = TRUE
             ,width = 12
             ,plotly::plotlyOutput(outputId = "plotly.stacked.barplot.activity.moving.time.2025")
-        )
+            )
       ) # End fluidRow()
       ,fluidRow(
         # Add a title row left-aligned

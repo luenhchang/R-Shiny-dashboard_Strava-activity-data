@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-02-15 Moved function.plotly.horizontal.bar.plot.gear.usage(data, metric_variable) from global.R here
 ## 2024-12-19 Moved customed functions from global.R, server.R to here
 ##---------------------------------------------------------------------------------------------------------
 
@@ -97,3 +98,35 @@ function.renderInfoBox <- function(shiny_output, output.id, arg.title, arg.value
       ,fill = arg.fill)
   }) # Close renderInfoBox()
 }# Close function{}
+
+#----------------------------------------------------------------------------
+# Function to create a horizontal bar plot on the usage of sport gear (shoes)
+#----------------------------------------------------------------------------
+## Required these variables in input data: gear_name_factor, metric variable (in quotes)
+function.plotly.horizontal.bar.plot.gear.usage <- function(shiny_output
+                                                           ,output.id
+                                                           ,data
+                                                           ,metric_variable) {
+  shiny_output[[output.id]] <- plotly::renderPlotly({
+    # Create the horizontal bar plot using sorted data
+    plotly::plot_ly(
+      data = data
+      ,x = ~.data[[metric_variable]]
+      ,y = ~ gear_name_factor # Maintain factor ordering
+      ,type = 'bar'
+      ,orientation = 'h'
+      ,text = ~gear_name_display  # Display formatted labels
+      ,textposition = "inside"
+      ,marker = list(color = 'lightblue')) %>%
+      plotly::layout(
+        xaxis = list(title = gsub("\\.", " ", metric_variable))
+        ,yaxis = list(title=""
+                      ,showticklabels = FALSE  # Hides y-axis tick labels
+                      ,automargin = TRUE # adjusts spacing
+                      ) 
+        ,margin = list( l = 10 # Reduce left margin to minimize white space
+                       ,r = 100 # Increase right margin to accommodate gear_name_display next to longest bars
+                       )  
+        ) # Close layout()
+  })
+}

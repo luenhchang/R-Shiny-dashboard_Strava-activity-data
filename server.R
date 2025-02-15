@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-02-15 Added 3 plotly horizontal bar plots for shoe usage distance, elapsed time, moving time
 ## 2025-02-03 Sorted data by start.date.local and start.datetime.local to ensure correct stacking order in Plotly stacked bar chart of daily active hour in 2025
 ## 2025-01-22 Added total elapsed hours valueBox to This Week's Progress
 ## 2024-12-19 Moved all customed functions to functions.R
@@ -113,6 +114,27 @@ server <- function(input, output, session) {
     ,argument.icon = icon("route")
     ,argument.color = "black"  # Color argument still required but overridden with CSS
   )
+  
+  #----------------
+  # Gear usage
+  #----------------
+  function.plotly.horizontal.bar.plot.gear.usage(
+    shiny_output = output
+    ,output.id="plotly.horizontal.bars.shoe.usage.total.distance.km"
+    ,data = gear.shoes.usage.total.distance.km
+    ,metric_variable = "total.distance.km")
+  
+  function.plotly.horizontal.bar.plot.gear.usage(
+    shiny_output = output
+    ,output.id="plotly.horizontal.bars.shoe.usage.total.elapsed.time.hour"
+    ,data = gear.shoes.usage.total.elapsed.time.hour
+    ,metric_variable = "total.elapsed.time.hour")
+  
+  function.plotly.horizontal.bar.plot.gear.usage(
+    shiny_output = output
+    ,output.id="plotly.horizontal.bars.shoe.usage.total.moving.time.hour"
+    ,data = gear.shoes.usage.total.moving.time.hour
+    ,metric_variable = "total.moving.time.hour")
   
   #----------------
   # 2023 valueBoxes

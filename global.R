@@ -628,10 +628,11 @@ gear.bikes <- data.frame(
                 ,"Merida_Ride400"
                 ,"Segway Ninebot MAX G30"
                 ,"Vsett 10+")
-  ,gear_type="bike") %>%
+  ,gear_type="bike"
+  ,gear_status=c("inactive","active","stolen","active")) %>%
   tidyr::separate(gear_URL, into = c("a", "b", "c", "d", "gear_id"), sep = "/", remove = FALSE) %>%
   dplyr::mutate(gear_id = paste0("b", gear_id)) %>%
-  dplyr::select(gear_type, gear_id, gear_name) # dim(gear.bikes) [1] 4 3
+  dplyr::select(gear_type, gear_id, gear_name, gear_status) # dim(gear.bikes) [1] 4 4
 
 # Manually create gear data for shoes by matching act_data.1$gear_id with gear names from individual activities
 gear.shoes <- data.frame(gear_id=c( "g12002111"
@@ -652,13 +653,15 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                                       ,"Mizuno Wave Inspire 15"
                                       ,"Mizuno Wave Rider 20"
                                       ,"Mizuno Wave Sayonara"
-                                      ,"Unbranded Kangaroo leather shoes"
+                                      ,"Kangaroo leather shoes"
                                       ,"Mizuno wave alchemy 7"
-                                      ,"Unbranded Perrieri"
+                                      ,"Perrieri sandals"
                                       ,"ASICS GT-2000")
-                         ,gear_type="shoe") # dim(gear.shoes) 11 3
+                         ,gear_type="shoe"
+                         ,gear_status=c("active","active","active","active","active","active","active","active"
+                                        ,"sole detaching","sole detaching","sole detaching")) # dim(gear.shoes) 11 4
 
-gear.id.names <- dplyr::bind_rows(gear.bikes, gear.shoes) # dim(gear.id.names) 15 3
+gear.id.names <- dplyr::bind_rows(gear.bikes, gear.shoes) # dim(gear.id.names) 15 4
 
 gear.data <- dplyr::left_join(
    x=act_data.1 %>% dplyr::select(gear_id, distance.km, elapsed.time.hour, moving.time.hour)
@@ -666,52 +669,61 @@ gear.data <- dplyr::left_join(
   ,by="gear_id"
   ,relationship = "many-to-one") %>%
   # Summarise data
-  dplyr::group_by(gear_type, gear_id, gear_name) %>%
+  dplyr::group_by(gear_type, gear_id, gear_name, gear_status) %>%
   dplyr::summarise(
      total.distance.km = sum(distance.km)
     ,total.elapsed.time.hour = sum(elapsed.time.hour)
     ,total.moving.time.hour = sum(moving.time.hour)
     ) %>% 
-  dplyr::filter(!is.na(gear_id)) # dim(gear.data) 15 6
+  dplyr::filter(!is.na(gear_id)) # dim(gear.data) 15 7
 
-# Function to create a horizontal bar plot
-create_bar_plot <- function(data, metric) {
-  # Create the plot
-  fig <- plotly::plot_ly(
-    data = data,
-    x = ~.data[[metric]],  # Use tidy evaluation
-    y = ~ gear_name_factor,  # Use gear_name without reordering
-    type = 'bar', 
-    orientation = 'h',
-    marker = list(color = 'blue')
-  ) %>% plotly::layout(
-    title = paste("Gear Usage by", gsub("\\.", " ", metric)),
-    xaxis = list(title = gsub("\\.", " ", metric), categoryorder = "total descending"),
-    yaxis = list(title = "Gear Name"),
-    margin = list(l = 200)  # Increase left margin for long gear names
-  )
-  
-  return(fig)
-}
+#--------------------------------------------------------------------------------------------------------------------------------
+# Gear (shoes) usage data
+## The important note is that plotly is set to order the plot alphabetically. If you want to change it, just try to change levels of factor.
+#-------------------------------------------------------------------------------------------------------------------------------
+gear.shoes.data <- gear.data %>% dplyr::filter(gear_type == "shoe") # dim(gear.shoes.data) 11 7
 
-# Filter the data and sort by the metric
-## The important note is that plotly is set to order the plot alphabetically. If you want to change it, just try to change levels of factor. 
-filtered_data <- gear.data %>% filter(gear_type == "shoe") %>%
+# Shoe usage by total distance km
+gear.shoes.usage.total.distance.km <- gear.shoes.data %>%
   dplyr::ungroup() %>%
+  # Descendingly sorted data- gear with most usage goes to bottom bar
   arrange(desc(total.distance.km)) %>%
   dplyr::mutate(
-     gear_name_order = dplyr::row_number() # Assign row number to maintain order in plot
+      gear_name_order = dplyr::row_number() # Assign row number to maintain order in plot
      ,gear_name_factor=factor(gear_name, levels = gear_name[order(gear_name_order)])
-     )
+     ,gear_name_display = ifelse(gear_status == "active"
+                                 ,paste0("<b>", gear_name, "</b>")
+                                 ,gear_name) # Bold active shoes
+     ) %>%
+  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.distance.km) # dim(gear.shoes.usage.total.distance.km) 11 5
 
-# Pass the filtered data to the function
-fig_distance <- create_bar_plot(
-  data = filtered_data,
-  metric = "total.distance.km"
-)
+# Shoe usage by total elapsed hours
+gear.shoes.usage.total.elapsed.time.hour <- gear.shoes.data %>%
+  dplyr::ungroup() %>%
+  # Descendingly sorted data- gear with most usage goes to bottom bar
+  arrange(desc(total.elapsed.time.hour)) %>%
+  dplyr::mutate(
+    gear_name_order = dplyr::row_number() # Assign row number to maintain order in plot
+    ,gear_name_factor=factor(gear_name, levels = gear_name[order(gear_name_order)])
+    ,gear_name_display = ifelse(gear_status == "active"
+                                ,paste0("<b>", gear_name, "</b>")
+                                ,gear_name) # Bold active shoes
+    ) %>%
+  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.elapsed.time.hour) # dim(gear.shoes.usage.total.elapsed.time.hour) 11 7
 
-fig_elapsed  <- create_bar_plot(gear.data, "total.elapsed.time.hour")
-fig_moving   <- create_bar_plot(gear.data, "total.moving.time.hour")
+# Shoe usage by total moving hours
+gear.shoes.usage.total.moving.time.hour <- gear.shoes.data %>%
+  dplyr::ungroup() %>%
+  # Descendingly sorted data- gear with most usage goes to bottom bar
+  arrange(desc(total.moving.time.hour)) %>%
+  dplyr::mutate(
+    gear_name_order = dplyr::row_number() # Assign row number to maintain order in plot
+    ,gear_name_factor=factor(gear_name, levels = gear_name[order(gear_name_order)])
+    ,gear_name_display = ifelse(gear_status == "active"
+                                ,paste0("<b>", gear_name, "</b>")
+                                ,gear_name) # Bold active shoes
+  ) %>%
+  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.moving.time.hour) # dim(gear.shoes.usage.total.elapsed.time.hour) 11 7
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
