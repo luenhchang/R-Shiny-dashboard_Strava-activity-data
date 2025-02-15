@@ -15,6 +15,7 @@
 ## [plotly::sublot not showing both titles](https://stackoverflow.com/questions/68796762/plotlysublot-not-showing-both-titles)
 ## [Missing Git tab in Rstudio on Windows computer](https://mikenguyen.netlify.app/post/missing-git-tab-in-rstudio-on-windows-computer/)
 ## [Specifying the colors in a Plotly Heatmap](https://stackoverflow.com/questions/44861851/specifying-the-colors-in-a-plotly-heatmap)
+## [Ordering columns in Plotly horizontal bar chart](https://stackoverflow.com/questions/53285059/ordering-columns-in-plotly-horizontal-bar-chart)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
 ## 2024-12-31 Lawn mowing included in top left-aligned legend of Activity hours in 2024 plot
@@ -616,16 +617,23 @@ stats <- merge(x = this_week_stats_long,
 # Match gear name with URL
 ## gear_id is the last part of a gear URL (e.g., https://www.strava.com/bikes/14034037 matches b14034037, Merida Scultura Endurance 6000 49cm)
 #------------------------------
-gear.bikes <- data.frame(gear_URL=c( "https://www.strava.com/bikes/14034037"
-                              ,"https://www.strava.com/bikes/10387460"
-                              ,"https://www.strava.com/bikes/14034016"
-                              ,"https://www.strava.com/bikes/10550734")
-                   ,gear_name=c( "Merida Scultura Endurance 6000 49cm"
-                                ,"Merida_Ride400"
-                                ,"Segway Ninebot MAX G30"
-                                ,"Vsett 10+"))
 
-# Go to individual activities and match shoes with their gear_id
+# Create gear_id for bikes that are similiar to the values in act_data.1$gear_id
+gear.bikes <- data.frame(
+   gear_URL=c(  "https://www.strava.com/bikes/14034037"
+               ,"https://www.strava.com/bikes/10387460"
+               ,"https://www.strava.com/bikes/14034016"
+               ,"https://www.strava.com/bikes/10550734")
+  ,gear_name=c( "Merida Scultura Endurance 6000 49cm"
+                ,"Merida_Ride400"
+                ,"Segway Ninebot MAX G30"
+                ,"Vsett 10+")
+  ,gear_type="bike") %>%
+  tidyr::separate(gear_URL, into = c("a", "b", "c", "d", "gear_id"), sep = "/", remove = FALSE) %>%
+  dplyr::mutate(gear_id = paste0("b", gear_id)) %>%
+  dplyr::select(gear_type, gear_id, gear_name) # dim(gear.bikes) [1] 4 3
+
+# Manually create gear data for shoes by matching act_data.1$gear_id with gear names from individual activities
 gear.shoes <- data.frame(gear_id=c( "g12002111"
                                    ,"g12002118"
                                    ,"g12002120"
@@ -635,7 +643,8 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                                    ,"g12002093"
                                    ,"g17856474"
                                    ,"g12002108"
-                                   ,"g14939278")
+                                   ,"g14939278"
+                                   ,"g18916219")
                          ,gear_name=c( "Mizuno Wave Inspire 13"
                                       ,"Mizuno Wave Ascend 7"
                                       ,"Mizuno Wave Daichi 4"
@@ -645,7 +654,64 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                                       ,"Mizuno Wave Sayonara"
                                       ,"Unbranded Kangaroo leather shoes"
                                       ,"Mizuno wave alchemy 7"
-                                      ,"Unbranded Perrieri"))
+                                      ,"Unbranded Perrieri"
+                                      ,"ASICS GT-2000")
+                         ,gear_type="shoe") # dim(gear.shoes) 11 3
+
+gear.id.names <- dplyr::bind_rows(gear.bikes, gear.shoes) # dim(gear.id.names) 15 3
+
+gear.data <- dplyr::left_join(
+   x=act_data.1 %>% dplyr::select(gear_id, distance.km, elapsed.time.hour, moving.time.hour)
+  ,y=gear.id.names
+  ,by="gear_id"
+  ,relationship = "many-to-one") %>%
+  # Summarise data
+  dplyr::group_by(gear_type, gear_id, gear_name) %>%
+  dplyr::summarise(
+     total.distance.km = sum(distance.km)
+    ,total.elapsed.time.hour = sum(elapsed.time.hour)
+    ,total.moving.time.hour = sum(moving.time.hour)
+    ) %>% 
+  dplyr::filter(!is.na(gear_id)) # dim(gear.data) 15 6
+
+# Function to create a horizontal bar plot
+create_bar_plot <- function(data, metric) {
+  # Create the plot
+  fig <- plotly::plot_ly(
+    data = data,
+    x = ~.data[[metric]],  # Use tidy evaluation
+    y = ~ gear_name_factor,  # Use gear_name without reordering
+    type = 'bar', 
+    orientation = 'h',
+    marker = list(color = 'blue')
+  ) %>% plotly::layout(
+    title = paste("Gear Usage by", gsub("\\.", " ", metric)),
+    xaxis = list(title = gsub("\\.", " ", metric), categoryorder = "total descending"),
+    yaxis = list(title = "Gear Name"),
+    margin = list(l = 200)  # Increase left margin for long gear names
+  )
+  
+  return(fig)
+}
+
+# Filter the data and sort by the metric
+## The important note is that plotly is set to order the plot alphabetically. If you want to change it, just try to change levels of factor. 
+filtered_data <- gear.data %>% filter(gear_type == "shoe") %>%
+  dplyr::ungroup() %>%
+  arrange(desc(total.distance.km)) %>%
+  dplyr::mutate(
+     gear_name_order = dplyr::row_number() # Assign row number to maintain order in plot
+     ,gear_name_factor=factor(gear_name, levels = gear_name[order(gear_name_order)])
+     )
+
+# Pass the filtered data to the function
+fig_distance <- create_bar_plot(
+  data = filtered_data,
+  metric = "total.distance.km"
+)
+
+fig_elapsed  <- create_bar_plot(gear.data, "total.elapsed.time.hour")
+fig_moving   <- create_bar_plot(gear.data, "total.moving.time.hour")
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#
