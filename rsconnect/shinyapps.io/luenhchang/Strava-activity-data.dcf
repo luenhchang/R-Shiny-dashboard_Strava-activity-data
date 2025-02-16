@@ -5,7 +5,7 @@ account: luenhchang
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12344944
-bundleId: 9804175
+bundleId: 9806491
 url: https://luenhchang.shinyapps.io/Strava-activity-data/
 version: 1
 asMultiple: FALSE

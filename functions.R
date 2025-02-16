@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-02-16 Replaced plotly::plot_ly(text = ~gear_name_display, textposition = "inside") with plotly::add_annotations(x = 0.1, y = data$gear_name_factor[i], text = data$gear_name_display[i]) for better control of text placement
 ## 2025-02-15 Moved function.plotly.horizontal.bar.plot.gear.usage(data, metric_variable) from global.R here
 ## 2024-12-19 Moved customed functions from global.R, server.R to here
 ##---------------------------------------------------------------------------------------------------------
@@ -109,17 +110,17 @@ function.plotly.horizontal.bar.plot.gear.usage <- function(shiny_output
                                                            ,metric_variable) {
   shiny_output[[output.id]] <- plotly::renderPlotly({
     # Create the horizontal bar plot using sorted data
-    plotly::plot_ly(
+    fig <- plotly::plot_ly(
       data = data
       ,x = ~.data[[metric_variable]]
       ,y = ~ gear_name_factor # Maintain factor ordering
       ,type = 'bar'
       ,orientation = 'h'
-      ,text = ~gear_name_display  # Display formatted labels
-      ,textposition = "inside"
+      #,text = ~gear_name_display  # Display formatted labels
+      ,textposition = "none"  # Hide default text placement #"inside"
       ,marker = list(color = 'lightblue')) %>%
       plotly::layout(
-        xaxis = list(title = gsub("\\.", " ", metric_variable))
+         xaxis = list(title = gsub("\\.", " ", metric_variable))
         ,yaxis = list(title=""
                       ,showticklabels = FALSE  # Hides y-axis tick labels
                       ,automargin = TRUE # adjusts spacing
@@ -128,5 +129,22 @@ function.plotly.horizontal.bar.plot.gear.usage <- function(shiny_output
                        ,r = 100 # Increase right margin to accommodate gear_name_display next to longest bars
                        )  
         ) # Close layout()
-  })
+    
+    # Add text annotations
+    ## Iterate over each row of data and adds an annotation (text label) to the plot for each bar
+    ### seq_len(nrow(data)) generates a sequence from 1 to the number of rows
+    for (i in seq_len(nrow(data))) {
+      fig <- fig %>%
+        plotly::add_annotations(
+           x = 0.1 # Align text to the left boundary of bars
+          ,y = data$gear_name_factor[i]
+          ,text = data$gear_name_display[i]
+          ,showarrow = FALSE
+          ,font = list(size = 12, color = "black")
+          ,xanchor = "left" # Control the anchor point of the text relative to its x position
+          ,align = "left" # Control the alignment of multi-line text within the annotation box.
+          )
+    }
+    fig
+  }) # Close renderPlotly()
 }
