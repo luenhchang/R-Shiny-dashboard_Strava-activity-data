@@ -126,7 +126,7 @@ function.plotly.horizontal.bar.plot.gear.usage <- function(shiny_output
                       ,automargin = TRUE # adjusts spacing
                       ) 
         ,margin = list( l = 10 # Reduce left margin to minimize white space
-                       ,r = 100 # Increase right margin to accommodate gear_name_display next to longest bars
+                       ,r = 10 # Reduce right margin to minimize white space
                        )  
         ) # Close layout()
     

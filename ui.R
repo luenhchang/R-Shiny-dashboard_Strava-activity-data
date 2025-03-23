@@ -80,6 +80,17 @@ body <- shinydashboard::dashboardBody(
           tags$h1("Running Shoe Usage: Distance, Elapsed Time & Moving Time", style = style.header)
           )
         ) # Close fluidRow()
+      ,fluidRow(
+        # Add the line of text below the title
+        column(
+          width=12
+          ,tags$p(
+            tags$strong("Bolded shoes in active use")
+            ,tags$br()  # Line break
+            ,"Unbolded shoes not in active use due to sole detaching; "
+          )
+        )
+      ) # Close fluidRow()
         ,fluidRow(
           box(title="Shoe used total distance km"
               ,status = "primary"

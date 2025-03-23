@@ -649,7 +649,7 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                          ,gear_name=c( "Mizuno Wave Inspire 13"
                                       ,"Mizuno Wave Ascend 7"
                                       ,"Mizuno Wave Daichi 4"
-                                      ,"Mizuno WAVE ULTIMA 3"
+                                      ,"Mizuno WAVE Ultima 3"
                                       ,"Mizuno Wave Inspire 15"
                                       ,"Mizuno Wave Rider 20"
                                       ,"Mizuno Wave Sayonara"
@@ -658,7 +658,7 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                                       ,"Perrieri sandals"
                                       ,"ASICS GT-2000")
                          ,gear_type="shoe"
-                         ,gear_status=c("active","active","active","active","active","active","active","active"
+                         ,gear_status=c("active","sole detaching","active","active","active","active","active","active"
                                         ,"sole detaching","sole detaching","sole detaching")) # dim(gear.shoes) 11 4
 
 gear.id.names <- dplyr::bind_rows(gear.bikes, gear.shoes) # dim(gear.id.names) 15 4
