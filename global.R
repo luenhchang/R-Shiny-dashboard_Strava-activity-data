@@ -99,7 +99,7 @@ my_acts <- rStrava::get_activity_list( stoken
 act_data <- rStrava::compile_activities(my_acts) |>
   # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
   dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 955 52
+# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 1027 52
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -272,7 +272,7 @@ act_data.1 <- act_data %>%
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
     ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 955 23
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1027 23
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
@@ -645,7 +645,8 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                                    ,"g17856474"
                                    ,"g12002108"
                                    ,"g14939278"
-                                   ,"g18916219")
+                                   ,"g18916219"
+                                   ,"g22410876")
                          ,gear_name=c( "Mizuno Wave Inspire 13"
                                       ,"Mizuno Wave Ascend 7"
                                       ,"Mizuno Wave Daichi 4"
@@ -656,12 +657,13 @@ gear.shoes <- data.frame(gear_id=c( "g12002111"
                                       ,"Kangaroo leather shoes"
                                       ,"Mizuno wave alchemy 7"
                                       ,"Perrieri sandals"
-                                      ,"ASICS GT-2000")
+                                      ,"ASICS GT-2000"
+                                      ,"Mizuno wave kazan")
                          ,gear_type="shoe"
                          ,gear_status=c("active","sole detaching","active","active","active","active","active","active"
-                                        ,"sole detaching","sole detaching","sole detaching")) # dim(gear.shoes) 11 4
+                                        ,"sole detaching","sole detaching","sole detaching","active")) # dim(gear.shoes) 12 4
 
-gear.id.names <- dplyr::bind_rows(gear.bikes, gear.shoes) # dim(gear.id.names) 15 4
+gear.id.names <- dplyr::bind_rows(gear.bikes, gear.shoes) # dim(gear.id.names) 16 4
 
 gear.data <- dplyr::left_join(
    x=act_data.1 %>% dplyr::select(gear_id, distance.km, elapsed.time.hour, moving.time.hour)
