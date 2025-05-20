@@ -146,6 +146,11 @@ server <- function(input, output, session) {
                           ,argument.subtitle="Year in sport")
   
   function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.number.activities.2023"
+                          ,argument.value=nrow(activities.2023) # 275
+                          ,argument.subtitle="Activities")
+  
+  function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.number.days.active.2023"
                           ,argument.value=length(unique(activities.2023$start.date.local)) # 275
                           ,argument.subtitle="Days active")
@@ -258,6 +263,11 @@ server <- function(input, output, session) {
                           ,output.id="valueBox.year.in.sport.2024"
                           ,argument.value=unique(activities.2024$start.year.local)
                           ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.number.activities.2024"
+                          ,argument.value=nrow(activities.2024) # 250
+                          ,argument.subtitle="Activ")
   
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.number.days.active.2024"
@@ -435,6 +445,11 @@ server <- function(input, output, session) {
                           ,output.id="valueBox.year.in.sport.2025"
                           ,argument.value=unique(activities.2025$start.year.local)
                           ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.number.activities.2025"
+                          ,argument.value=nrow(activities.2025) # 73
+                          ,argument.subtitle="Activities")
   
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.number.days.active.2025"
@@ -828,6 +843,26 @@ server <- function(input, output, session) {
                           ,output.id="valueBox.total.cycling.elevation.2024"
                           ,argument.value=paste(format(round(sum(activities.2024$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 275
                           ,argument.subtitle="Total cycling elevation gain")
+  
+  #----------------
+  # 2025 valueBoxes
+  # Valid colors are: red, yellow, aqua, blue, light-blue, green, navy, teal, olive, lime, orange, fuchsia, purple, maroon, black.
+  #----------------
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.ride.year.in.sport.2025"
+                          ,argument.value=unique(activities.2025$start.year.local)
+                          ,argument.subtitle="Year in sport")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.distance.2025"
+                          ,argument.value=paste(format(round(sum(activities.2025$distance.km, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "km") # 1,201 km
+                          ,argument.subtitle="Total cycling distance")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.cycling.elevation.2025"
+                          ,argument.value=paste(format(round(sum(activities.2025$elevation.gain.m, na.rm = TRUE), digits = 0), nsmall = 0, big.mark = ","), "m") # 12,808 m
+                          ,argument.subtitle="Total cycling elevation gain")
+  
   #----------------------------------------------------------------------
   # Yearly cycling elevation gain per weekday by plotly calendar heatmaps
   #----------------------------------------------------------------------

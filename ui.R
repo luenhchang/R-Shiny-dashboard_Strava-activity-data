@@ -118,6 +118,7 @@ body <- shinydashboard::dashboardBody(
           tags$h1("This Year Progress", style = style.header)
         )
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.activities.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2025", width = 2)
@@ -137,6 +138,7 @@ body <- shinydashboard::dashboardBody(
           tags$h1("Past Year Progress", style = style.header)
         )
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.activities.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
@@ -151,6 +153,7 @@ body <- shinydashboard::dashboardBody(
         ) # End fluidRow()
       ,fluidRow(
          shinydashboard::valueBoxOutput(outputId = "valueBox.year.in.sport.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.activities.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2023", width = 2)
@@ -250,6 +253,11 @@ body <- shinydashboard::dashboardBody(
     #************************************
     ,shinydashboard::tabItem(
       tabName = "tabRide"
+      ,fluidRow(
+         shinydashboard::valueBoxOutput(outputId = "valueBox.ride.year.in.sport.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.elevation.2025", width = 2)
+        )
       ,fluidRow(
          shinydashboard::valueBoxOutput(outputId = "valueBox.ride.year.in.sport.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.cycling.distance.2024", width = 2)

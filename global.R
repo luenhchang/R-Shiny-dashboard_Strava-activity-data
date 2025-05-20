@@ -479,7 +479,7 @@ activities.2025 <- act_data.1 %>%
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
-  )# dim(activities.2025) 31 24
+  )# dim(activities.2025)  73 24
 
 data.moving.time.2025 <- activities.2025 %>%  
   dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 31 24
@@ -613,10 +613,10 @@ stats <- merge(x = this_week_stats_long,
     )
   )
 
-#------------------------------
+#-------------------------------------------------------------------------------
 # Match gear name with URL
 ## gear_id is the last part of a gear URL (e.g., https://www.strava.com/bikes/14034037 matches b14034037, Merida Scultura Endurance 6000 49cm)
-#------------------------------
+#-------------------------------------------------------------------------------
 
 # Create gear_id for bikes that are similiar to the values in act_data.1$gear_id
 gear.bikes <- data.frame(
