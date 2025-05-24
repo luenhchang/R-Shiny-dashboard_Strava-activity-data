@@ -247,6 +247,9 @@ run <- act_data |>
 #**************************
 # Process activity data
 #**************************
+# Replace this resting heart rate when you have the measurement
+HR_resting_hypothetical <- 60
+
 # 2024-10-01T02:35:06Z is in UTC. The "Z" at the end stands for Zulu time, which is another way to indicate UTC (Coordinated Universal Time).
 act_data.1 <- act_data %>%
   dplyr::select(id, start_date, name, gear_id, sport_type, distance, total_elevation_gain, elapsed_time, moving_time,average_heartrate, max_heartrate) %>%
@@ -271,8 +274,15 @@ act_data.1 <- act_data %>%
     ,distance.km=distance
     ,elevation.gain.m= total_elevation_gain # Elevation gain in meters
     ,elapsed.time.hour=elapsed_time/60/60
-    ,moving.time.hour= moving_time/60/60) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1027 23
+    ,moving.time.hour= moving_time/60/60
+    # Calculate simplified Training Impulse (TRIMP) as a training load estimate
+    ## Simplified TRIMP= Duration (min) * (avg HR- resting HR)/(Max HR- resting HR)
+    ,simplified.TRIMP = case_when(
+      !is.na(moving_time) & !is.na(average_heartrate) & !is.na(max_heartrate) ~
+        (moving_time / 60) * (as.numeric(average_heartrate) - HR_resting_hypothetical) / (as.numeric(max_heartrate) - HR_resting_hypothetical)
+      ,TRUE ~ NA_real_ )
+    ) %>%
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1110 23
 
 #*****************************************
 # Read data to use under menuItem "Ride" 

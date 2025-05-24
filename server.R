@@ -587,10 +587,11 @@ server <- function(input, output, session) {
   #---------------------------------
   output$dataTable.activity.moving.time <- DT::renderDataTable({
     act_data.2 <- act_data.1 %>% 
-      dplyr::select(start.date.local, name, sport_type,elapsed.time.hour, moving.time.hour, average_heartrate, max_heartrate) %>%
+      dplyr::select(start.date.local, name, sport_type,elapsed.time.hour, moving.time.hour, average_heartrate, max_heartrate, simplified.TRIMP) %>%
       dplyr::mutate(
         elapsed.time.hour=round(elapsed.time.hour, digits = 2)
         ,moving.time.hour=round(moving.time.hour, digits = 2)
+        ,simplified.TRIMP=round(simplified.TRIMP, digits = 0)
         ) %>%
       dplyr::rename(Date=start.date.local
                     ,Activity=name
@@ -598,7 +599,8 @@ server <- function(input, output, session) {
                     ,`Elapsed hours`= elapsed.time.hour
                     ,`Active hours`= moving.time.hour
                     ,`Averaged heart rate`= average_heartrate
-                    ,`Max heart rate`=max_heartrate) # dim(act_data.2) 924 6
+                    ,`Max heart rate`=max_heartrate
+                    ,`Simplified TRIMP`=simplified.TRIMP) # dim(act_data.2) 924 6
     
     # Left-align character columns, right-align numeric columns
     DT::datatable(act_data.2
