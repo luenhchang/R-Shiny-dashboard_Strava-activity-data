@@ -68,10 +68,11 @@ body <- shinydashboard::dashboardBody(
           width = 12,
           tags$h1("This Week's Fitness Highlights", style = style.header)
           )
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.number.activities", width = 3)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.number.activities", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.elapsed.hours", width = 3)
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.moving.hours", width = 3)
-        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.distance", width = 3)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.moving.hours", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.distance", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.this.week.progress.TRIMP", width = 3)
       ) # Close fluidRow()
       ,fluidRow(
         # Add a title row left-aligned

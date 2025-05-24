@@ -47,6 +47,7 @@ server <- function(input, output, session) {
   ## (2) Elapsed time
   ## (3) Active time
   ## (4) Distance
+  ## (5) TRIMP training load
   #-----------------------------
   # Number of activities this week
   function.renderValueBox(shiny_output = output
@@ -114,6 +115,26 @@ server <- function(input, output, session) {
     ,argument.icon = icon("route")
     ,argument.color = "black"  # Color argument still required but overridden with CSS
   )
+  
+  # TRIMP training load this week
+  function.renderValueBox(
+     shiny_output = output
+    ,output.id = "valueBox.this.week.progress.TRIMP"
+    ,argument.value = HTML(
+      paste0(
+        "Training Load <br>"
+        ,stats %>% filter(metric == "total_simplified_TRIMP") %>% dplyr::pull(value_this_formatted)
+      )
+    )
+    ,argument.subtitle = HTML(
+      paste0(
+        stats %>% filter(metric == "total_simplified_TRIMP") %>% dplyr::pull(subtitle)
+      )
+    )
+    ,argument.icon = icon("heartbeat")  # You can change this to any relevant Font Awesome icon
+    ,argument.color = "black"
+  )
+  
   
   #----------------
   # Gear usage

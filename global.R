@@ -508,17 +508,18 @@ start_of_last_week <- start_of_this_week - 7
 this_week_stats <- act_data.1 %>%
   filter(start.date.local >= start_of_this_week) %>%
   summarise(
-    total_distance_km = sum(distance.km, na.rm = TRUE)
+     total_distance_km = sum(distance.km, na.rm = TRUE)
     ,total_elapsed_time_hour= sum(elapsed.time.hour, na.rm = TRUE)
     ,total_moving_time_hour = sum(moving.time.hour, na.rm = TRUE)
     ,number_activities = n()  # Count the number of activities
+    ,total_simplified_TRIMP=sum(simplified.TRIMP, na.rm = TRUE)
   ) %>%
   replace(is.na(.), 0)
 
 # Reshape data to long format
 this_week_stats_long <- this_week_stats %>% 
   tidyr::pivot_longer(
-    cols = c(total_distance_km,total_elapsed_time_hour, total_moving_time_hour, number_activities)
+    cols = c(total_distance_km,total_elapsed_time_hour, total_moving_time_hour, number_activities, total_simplified_TRIMP)
     ,names_to = "metric"
     ,values_to = "value") %>%
   mutate(week = "this")
@@ -531,13 +532,14 @@ last_week_stats <- act_data.1 %>%
     ,total_elapsed_time_hour= sum(elapsed.time.hour, na.rm = TRUE)
     ,total_moving_time_hour = sum(moving.time.hour, na.rm = TRUE)
     ,number_activities = n()  # Count the number of activities
+    ,total_simplified_TRIMP=sum(simplified.TRIMP, na.rm = TRUE)
   ) %>%
   replace(is.na(.), 0)
 
 # Reshape data to long format
 last_week_stats_long <- last_week_stats %>%
   tidyr::pivot_longer(
-    cols = c(total_distance_km,total_elapsed_time_hour, total_moving_time_hour, number_activities)
+    cols = c(total_distance_km,total_elapsed_time_hour, total_moving_time_hour, number_activities, total_simplified_TRIMP)
     ,names_to = "metric"
     ,values_to = "value") %>%
   mutate(week = "last")
@@ -551,7 +553,6 @@ stats <- merge(x = this_week_stats_long,
   dplyr::mutate(
     value_this_formatted = case_when(
        metric == "total_distance_km" ~ paste0((round(value_this, digits = 2))," km")
-      #,metric == "total_moving_time_hour" ~ {
       ,metric %in% c("total_elapsed_time_hour","total_moving_time_hour")  ~ {
         # Convert value_this to hours and minutes format
         hours <- floor(value_this)  # Whole hours
@@ -563,8 +564,9 @@ stats <- merge(x = this_week_stats_long,
           paste0(hours, "h ", minutes, "m"),
           paste0(minutes, "m")  # If hours < 1, only show minutes
         )
-      },
-      TRUE ~ as.character(value_this)  # For other metrics, keep value_this as is
+      }
+      ,metric == "total_simplified_TRIMP" ~ paste0(round(value_this, 0), " TRIMP")
+      ,TRUE ~ as.character(value_this)  # For other metrics, keep value_this as is
     ),
     # Calculate numeric changes 
     change = round(value_this - value_last, digits = 2)
@@ -586,9 +588,10 @@ stats <- merge(x = this_week_stats_long,
           paste0(hours, " h ", minutes, " m"), 
           paste0(minutes, " m")
         )
-      },
-      metric == "total_distance_km" ~ paste0(round(abs(value_this - value_last), 2), " km"),
-      TRUE ~ as.character(abs(change))  # Default case
+      }
+      ,metric == "total_distance_km" ~ paste0(round(abs(value_this - value_last), 2), " km")
+      ,metric == "total_simplified_TRIMP" ~ paste0(round(abs(change), 0), " TRIMP")
+      ,TRUE ~ as.character(abs(change))  # Default case
     ),
     # argument expression to use in valueBox subtitle
     subtitle = case_when(
@@ -598,27 +601,34 @@ stats <- merge(x = this_week_stats_long,
                ifelse(change < 0, 
                       "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
                       "<span style='color:gray;'>—</span>"         # Neutral dash in gray
-               )
-        ), " ", change.formatted),
-      #metric == "total_moving_time_hour" ~ paste0(
-       metric %in% c("total_elapsed_time_hour","total_moving_time_hour") ~ paste0(  
+                      )
+               ), " ", change.formatted)
+      ,metric %in% c("total_elapsed_time_hour","total_moving_time_hour") ~ paste0(  
         ifelse(change > 0, 
                "<span style='color:green;'>&#9650;</span>",  # ▲ Upward triangle in green
                ifelse(change < 0, 
                       "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
                       "<span style='color:gray;'>—</span>"         # Neutral dash in gray
+                      )
                )
-               )
-        , " "
-        , change.formatted)
+        , " ", change.formatted)
       ,metric == "total_distance_km" ~ paste0(
         ifelse(change > 0, 
                "<span style='color:green;'>&#9650;</span>",  # ▲ Upward triangle in green
                ifelse(change < 0, 
                       "<span style='color:red;'>&#9660;</span>",   # ▼ Downward triangle in red
                       "<span style='color:gray;'>—</span>"         # Neutral dash in gray
+                      )
                )
-        ), " ", change.formatted)
+        , " ", change.formatted)
+      ,metric == "total_simplified_TRIMP" ~ paste0(
+        ifelse(change > 0, 
+               "<span style='color:green;'>&#9650;</span>", # ▲ Upward triangle in green
+               ifelse(change < 0, 
+                      "<span style='color:red;'>&#9660;</span>", # ▼ Downward triangle in red
+                      "<span style='color:gray;'>—</span>") # Neutral dash in gray
+               )
+        , " ", change.formatted)
       ,TRUE ~ "<span style='color:gray;'>—</span>"  # Default case for other metrics
     )
   )
