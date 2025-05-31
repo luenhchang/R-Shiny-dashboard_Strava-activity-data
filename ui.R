@@ -123,6 +123,7 @@ body <- shinydashboard::dashboardBody(
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2025", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2025", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.distance.covered.2025", width = 2)
       ) # End fluidRow()
       ,fluidRow(
         box(title="Active hours in 2025"
@@ -143,6 +144,7 @@ body <- shinydashboard::dashboardBody(
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2024", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2024", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.distance.covered.2024", width = 2)
         ) # End fluidRow()
       ,fluidRow(
         box(title="Active hours in 2024"
@@ -158,6 +160,7 @@ body <- shinydashboard::dashboardBody(
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.number.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.proportion.days.active.2023", width = 2)
         ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.moving.hours.2023", width = 2)
+        ,shinydashboard::valueBoxOutput(outputId = "valueBox.total.distance.covered.2023", width = 2)
         ) # End fluidRow()
       ,fluidRow(
         box(title="Active hours in 2023"

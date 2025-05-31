@@ -60,27 +60,54 @@ is_current_year <- function(year) {
 ## [How do you use "<<-" (scoping assignment) in R?](https://stackoverflow.com/questions/2628621/how-do-you-use-scoping-assignment-in-r)
 #------------------------------------------------------------------------------------------------
 # Define function for renderValueBox()
-function.renderValueBox <- function(shiny_output
-                                    ,output.id
-                                    ,argument.value
-                                    ,argument.subtitle
-                                    ,argument.icon
-                                    ,argument.icon.lib
-                                    ,argument.color){
+# function.renderValueBox <- function(shiny_output
+#                                     ,output.id
+#                                     ,argument.value
+#                                     ,argument.subtitle
+#                                     ,argument.icon
+#                                     ,argument.icon.lib
+#                                     ,argument.color){
+#   # Write default values to optional arguments
+#   if(missing(argument.icon)){argument.icon <- "th-list"}
+#   if(missing(argument.icon.lib)){argument.icon.lib <- "glyphicon"}
+#   if(missing(argument.color)){argument.color<-"orange"}
+#   
+#   shiny_output[[output.id]] <- shinydashboard::renderValueBox({
+#     shinydashboard::valueBox(
+#       value = argument.value
+#       ,subtitle = argument.subtitle
+#       #,icon = icon(argument.icon, lib = argument.icon.lib)
+#       ,color = argument.color)
+#   }) # Close renderValueBox()
+# } # Close function{}
+
+function.renderValueBox <- function(shiny_output,
+                                    output.id,
+                                    argument.value,
+                                    argument.subtitle,
+                                    argument.icon,
+                                    argument.icon.lib,
+                                    argument.color,
+                                    value.font.size = "36px"
+                                    ,subtitle.font.size = "16px") {    
   # Write default values to optional arguments
-  if(missing(argument.icon)){argument.icon <- "th-list"}
-  if(missing(argument.icon.lib)){argument.icon.lib <- "glyphicon"}
-  if(missing(argument.color)){argument.color<-"orange"}
+  if (missing(argument.icon)) argument.icon <- "th-list"
+  if (missing(argument.icon.lib)) argument.icon.lib <- "glyphicon"
+  if (missing(argument.color)) argument.color <- "orange"
+  
+  # Apply custom HTML with inline styles for font size
+  styled.value <- HTML(paste0("<span style='font-size:", value.font.size, "; font-weight:bold;'>", argument.value, "</span>"))
+  styled.subtitle <- HTML(paste0("<span style='font-size:", subtitle.font.size, ";'>", argument.subtitle, "</span>"))
   
   shiny_output[[output.id]] <- shinydashboard::renderValueBox({
     shinydashboard::valueBox(
-      value = argument.value
-      ,subtitle = argument.subtitle
-      #,icon = icon(argument.icon, lib = argument.icon.lib)
-      ,color = argument.color)
+       value = styled.value
+      ,subtitle = styled.subtitle
+      ,# icon = icon(argument.icon, lib = argument.icon.lib)
+      ,color = argument.color
+    )
   }) # Close renderValueBox()
-} # Close function{}
-
+}
 
 # Define function for renderInfoBox()
 ## Default icon set to trophy

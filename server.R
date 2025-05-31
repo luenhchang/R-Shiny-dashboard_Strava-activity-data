@@ -189,6 +189,11 @@ server <- function(input, output, session) {
                           ,argument.value=paste(round(sum(activities.2023$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
   
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.distance.covered.2023"
+                          ,argument.value=paste(round(sum(activities.2023$distance.km, na.rm = TRUE), digits = 0), "km") # 7422 km
+                          ,argument.subtitle="Total distance covered")
+  
   #-------------------------------------
   # 2023 active hours daily using ggplot2
   #-------------------------------------
@@ -288,7 +293,7 @@ server <- function(input, output, session) {
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.number.activities.2024"
                           ,argument.value=nrow(activities.2024) # 250
-                          ,argument.subtitle="Activ")
+                          ,argument.subtitle="Activities")
   
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.number.days.active.2024"
@@ -313,6 +318,11 @@ server <- function(input, output, session) {
                           ,output.id="valueBox.total.moving.hours.2024"
                           ,argument.value=paste(round(sum(activities.2024$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.distance.covered.2024"
+                          ,argument.value=paste(round(sum(activities.2024$distance.km, na.rm = TRUE), digits = 0), "km") # 3661 km
+                          ,argument.subtitle="Total distance covered")
   
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.total.cycling.distance.2024"
@@ -495,6 +505,11 @@ server <- function(input, output, session) {
                           ,output.id="valueBox.total.moving.hours.2025"
                           ,argument.value=paste(round(sum(activities.2025$moving.time.hour, na.rm = TRUE), digits = 0), "hours") # 275
                           ,argument.subtitle="Total active time")
+  
+  function.renderValueBox(shiny_output = output
+                          ,output.id="valueBox.total.distance.covered.2025"
+                          ,argument.value=paste(round(sum(activities.2025$distance.km, na.rm = TRUE), digits = 0), "km") # 1470 km
+                          ,argument.subtitle="Total distance covered")
   
   function.renderValueBox(shiny_output = output
                           ,output.id="valueBox.total.cycling.distance.2025"
