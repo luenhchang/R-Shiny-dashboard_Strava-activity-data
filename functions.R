@@ -175,3 +175,7 @@ function.plotly.horizontal.bar.plot.gear.usage <- function(shiny_output
     fig
   }) # Close renderPlotly()
 }
+
+#-----------------------------------------------
+# Function to export Strava data to Google drive
+#-----------------------------------------------

@@ -18,6 +18,7 @@
 ## [Ordering columns in Plotly horizontal bar chart](https://stackoverflow.com/questions/53285059/ordering-columns-in-plotly-horizontal-bar-chart)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-06-12 App run well locally but had this error when deploying to shinyapps.io- An error has occurred Unable to connect to worker after 60.00 seconds; startup took too long. Contact the author for more information.
 ## 2024-12-31 Lawn mowing included in top left-aligned legend of Activity hours in 2024 plot
 ## 2024-12-31 Added Lawn mowing in activity.type.
 ## 2024-12-19 Moved all customed functions to functions.R
@@ -34,34 +35,29 @@
 # Load R packages
 ## Required uninstalled packages in local PC will cause errors library(pkg) is not available while deploying app to shinyapps.io
 #----------------------------------------------------------------------------------------------------------
-library(shiny)
-library(shinydashboard)
 library(dplyr)
-#install.packages('rStrava')
-library(rStrava)
-library(googlesheets4)
+#library(rStrava)
+#library(googlesheets4)
 library(lubridate)
-library(DT)
-library(plotly)
-library(httr)
-library(httr2)
-library(hms)
-library(jsonlite)
-library(pals)
-library(rsconnect)
-library(usethis)
-library(viridis)
+#library(DT)
+#library(plotly)
+#library(httr)
+#library(hms)
+#library(jsonlite)
+#library(rsconnect)
+#library(usethis)
+library(readr)
 
 #------------------------------------------------------------------------
 # Directory in local PC
 ## www: Where all the images and other assets needed for the viewer
 #------------------------------------------------------------------------
-dir.C <- "C:"
-dir.app <- file.path(dir.C, "GoogleDrive_MyDrive","scripts","RProject_Shinyapp_Strava-activity-data")
-dir.data <- file.path(dir.app,"data")
-dir.fitness <- file.path(dir.C, "GoogleDrive_MyDrive","Fitness")
-dir.Strava <- file.path(dir.fitness,"Strava")
-dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
+# dir.C <- "C:"
+# dir.app <- file.path(dir.C, "GoogleDrive_MyDrive","scripts","RProject_Shinyapp_Strava-activity-data")
+# dir.data <- file.path(dir.app,"data")
+# dir.fitness <- file.path(dir.C, "GoogleDrive_MyDrive","Fitness")
+# dir.Strava <- file.path(dir.fitness,"Strava")
+# dir.Strava.export_37641772 <- file.path(dir.Strava,"export_37641772")
 
 #----------------------------------
 # Import functions from functions.R
@@ -82,7 +78,7 @@ source("functions.R")
 # Read authentication file .httr-oauth from the app folder
 #setwd(dir.app)
 stoken <- httr::config(token = readRDS('.httr-oauth')[[1]])
-print(stoken) 
+# print(stoken) 
 # <request>
 #   Auth token: Token2.0
 
@@ -93,13 +89,12 @@ profile.start.date <- as.Date(info.athlete.ID.37641772$created_at)
 
 # Get activities by date range
 my_acts <- rStrava::get_activity_list( stoken
-                                       ,after = profile.start.date #as.Date('2020-12-31')
-) # class(my_acts) "list"
+                                       ,after = profile.start.date) # class(my_acts) "list"
 
 act_data <- rStrava::compile_activities(my_acts) |>
   # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
   dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 1027 52
+# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 1147 51
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -129,7 +124,7 @@ activity_df <- as.data.frame(t(unlist(activity_data)), stringsAsFactors = FALSE)
 stats_df <- as.data.frame(t(unlist(activity_data$stats)), stringsAsFactors = FALSE)
 
 # Combine the main activity data with the nested stats data
-activity_df <- bind_cols(activity_df, stats_df)
+activity_df <- dplyr::bind_cols(activity_df, stats_df)
 
 # Print the resulting data frame
 #print(activity_df)
@@ -165,13 +160,13 @@ poolswim.log <- googlesheets4::read_sheet(sheet_id
       ,"Laps and training : \n"
       ,gsub(x=Laps_training, pattern=";", replacement="\n")
     ) # End paste()
-  ) # dim(poolswim.log) 23 16
+  ) # dim(poolswim.log) 24 16
 
 # Authentication complete. Please close this page and return to R.
 poolswim.combined <- dplyr::left_join(
-  x=poolswim.log
+   x=poolswim.log
   ,y=poolswim[,c("name","start_date_local","average_heartrate", "max_heartrate")]
-  ,by=c("Strava_activity_name"="name") ) # dim(poolswim.combined) 23 19
+  ,by=c("Strava_activity_name"="name") ) # dim(poolswim.combined) 24 19
 
 #*****************************************
 # Read data to use under menuItem "Walk" 
@@ -198,7 +193,7 @@ walk <- act_data |>
                   ,"Distance :", distance, "km", "\n"
                   ,"Moving time :", moving_time_period, "\n"
                   ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-                ) # dim(walk) 73 14
+                ) # dim(walk) 145 14
 
 # Read a single activity of Walk from Strava using id
 ## [Retrieve streams for Strava activities, and convert to a dataframe](https://rdrr.io/cran/rStrava/man/get_activity_streams.html)
@@ -232,7 +227,7 @@ run <- act_data |>
     ,pace_mmss_per_km_fmt = sprintf("%02d:%02d", pace_minute_part, pace_second_part)
     # Customise hover text
     ,hovertext=paste(
-      "Event Name :", name, "(Event ID :", id, ")", "\n"
+       "Event Name :", name, "(Event ID :", id, ")", "\n"
       ,"Distance :", distance, "km", "\n"
       ,"Moving time :", moving_time_period, "\n"
       ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
@@ -256,7 +251,7 @@ act_data.1 <- act_data %>%
   dplyr::mutate(
      start.datetime.UTC=as.POSIXct(x=start_date, format ="%Y-%m-%dT%H:%M:%SZ", tz="GMT")
     ,start.date.UTC=lubridate::date(start.datetime.UTC)
-    ,start.datetime.local=case_when(
+    ,start.datetime.local=dplyr::case_when(
       start.date.UTC >= lubridate::ymd('2023-01-16') & start.date.UTC <= lubridate::ymd('2023-02-05')~
         format(start.datetime.UTC, tz="Asia/Kuala_Lumpur",usetz=TRUE)
       ,start.date.UTC >= lubridate::ymd('2023-09-02') & start.date.UTC <= lubridate::ymd('2023-10-02') ~ 
@@ -277,12 +272,12 @@ act_data.1 <- act_data %>%
     ,moving.time.hour= moving_time/60/60
     # Calculate simplified Training Impulse (TRIMP) as a training load estimate
     ## Simplified TRIMP= Duration (min) * (avg HR- resting HR)/(Max HR- resting HR)
-    ,simplified.TRIMP = case_when(
+    ,simplified.TRIMP = dplyr::case_when(
       !is.na(moving_time) & !is.na(average_heartrate) & !is.na(max_heartrate) ~
         (moving_time / 60) * (as.numeric(average_heartrate) - HR_resting_hypothetical) / (as.numeric(max_heartrate) - HR_resting_hypothetical)
       ,TRUE ~ NA_real_ )
     ) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1110 23
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1147 24
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
@@ -294,7 +289,7 @@ ride <- act_data.1 |>
   dplyr::mutate(
     # Convert seconds to lubridate duration
     ,moving_time_period=lubridate::seconds_to_period(moving_time)
-    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 327 16
+    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 348 16
 
 # Read single activity (not working)
 # activity.11826580247 <- rStrava::get_activity_streams(
@@ -330,7 +325,7 @@ ride.day <- ride %>%
   dplyr::group_by(start.year.local) %>%
   dplyr::arrange(start.date.local) %>%
   dplyr::mutate(ride.distance.cum.year = cumsum(distance.km.day)
-                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 313 11
+                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 331 11
 
 # Calculate total ride distance, elevation per weekday, year
 ride.weekday.year <- ride %>%
@@ -339,7 +334,7 @@ ride.weekday.year <- ride %>%
   dplyr::summarise(count.ride=dplyr::n()
                    ,total.ride.distance.dayOfWeek= round(sum(distance.km), digits = 2)
                    ,total.ride.elevation.dayOfWeek=round(sum(elevation.gain.m), digits = 2)
-                   ) # dim(ride.weekday.year) 31 5
+                   ) # dim(ride.weekday.year) 37 5
 
 #-----------------------------------------------------
 # Find weekday with greatest number of rides in a year
@@ -350,7 +345,7 @@ ride.year.highest.ride.count.weekday <- ride.weekday.year %>%
   dplyr::filter(count.ride==max(count.ride)) %>%
   # Customise text following infobox title "The most active weekday in"
   dplyr::mutate(infobox.value = paste0(start.year.local, " : ", start.weekday.local, 
-                                       " (", count.ride, " rides)")) # dim(ride.year.highest.ride.count.weekday) 5 6 # ride.year.highest.ride.count.weekday$infobox.value
+                                       " (", count.ride, " rides)")) # dim(ride.year.highest.ride.count.weekday) 6 6 # ride.year.highest.ride.count.weekday$infobox.value
 
 # Collapse all values into a single string with <br/> for line breaks
 infobox.value.yearly.weekday.highest.ride.number <- htmltools::HTML(paste(ride.year.highest.ride.count.weekday$infobox.value, collapse = "<br/>"))
@@ -404,7 +399,7 @@ monthly.activeness.percentage <- act_data.1 %>%
   dplyr::mutate(
     days_in_month = lubridate::days_in_month(as.Date(paste(start.year.local, start.month.local, "01", sep = "-"))),
     percent.days.active = (unique_days / days_in_month) * 100
-  ) # dim(monthly.activeness.percentage) [1] 51  5
+  ) # dim(monthly.activeness.percentage) [1] 53  5
 
 most.active.months <- monthly.activeness.percentage %>%
   # Group by year
@@ -422,7 +417,7 @@ most.active.months <- monthly.activeness.percentage %>%
                            ," ("
                            , round(percent.days.active, digits = 2)
                            , "% of days with exercise)")
-  )# dim(most.active.months) [1] 6 7
+  )# dim(most.active.months) [1] 5 7
 
 # Collapse all values into a single string with <br/> for line breaks
 infobox.value.most.active.months <- htmltools::HTML(paste(most.active.months$infobox.value, collapse = "<br/>"))
@@ -460,7 +455,7 @@ activities.2023 <- act_data.1 %>%
     ,grepl(pattern="rehabilitation exercise|strength and stability exercises|dry land exercises", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("strength & stability workout")
     ,grepl(pattern="bike fitting", x=name, ignore.case=TRUE) ~ stringi::stri_trans_totitle("bike fitting")
     ,TRUE ~ sport_type )
-    ) # dim(activities.2023) 404 24
+    ) # dim(activities.2023) 404 25
 
 #------------------
 # Process 2024 data
@@ -473,10 +468,10 @@ activities.2024 <- act_data.1 %>%
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
-                )# dim(activities.2024) 249 24
+                )# dim(activities.2024) 250 24
 
 data.moving.time.2024 <- activities.2024 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 235 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 236 24
 
 #------------------
 # Process 2025 data
@@ -489,7 +484,7 @@ activities.2025 <- act_data.1 %>%
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
-  )# dim(activities.2025)  73 24
+  )# dim(activities.2025)  193 25
 
 data.moving.time.2025 <- activities.2025 %>%  
   dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 31 24
@@ -673,7 +668,7 @@ gear.data <- dplyr::left_join(
     ,total.elapsed.time.hour = sum(elapsed.time.hour)
     ,total.moving.time.hour = sum(moving.time.hour)
     ) %>% 
-  dplyr::filter(!is.na(gear_id)) # dim(gear.data) 15 7
+  dplyr::filter(!is.na(gear_id)) # dim(gear.data) 16 7
 
 #--------------------------------------------------------------------------------------------------------------------------------
 # Gear (shoes) usage data
@@ -693,7 +688,7 @@ gear.shoes.usage.total.distance.km <- gear.shoes.data %>%
                                  ,paste0("<b>", gear_name, "</b>")
                                  ,gear_name) # Bold active shoes
      ) %>%
-  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.distance.km) # dim(gear.shoes.usage.total.distance.km) 11 5
+  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.distance.km) # dim(gear.shoes.usage.total.distance.km) 12 5
 
 # Shoe usage by total elapsed hours
 gear.shoes.usage.total.elapsed.time.hour <- gear.shoes.data %>%
@@ -721,7 +716,7 @@ gear.shoes.usage.total.moving.time.hour <- gear.shoes.data %>%
                                 ,paste0("<b>", gear_name, "</b>")
                                 ,gear_name) # Bold active shoes
   ) %>%
-  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.moving.time.hour) # dim(gear.shoes.usage.total.elapsed.time.hour) 11 7
+  dplyr::select(gear_type, gear_id, gear_name_order, gear_name_factor, gear_status, gear_name_display, total.moving.time.hour) # dim(gear.shoes.usage.total.elapsed.time.hour) 12 7
 
 #************************************************************************************************#
 #---------------------------------This is the end of this file ----------------------------------#

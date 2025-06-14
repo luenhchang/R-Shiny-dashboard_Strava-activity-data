@@ -5,9 +5,9 @@ account: luenhchang
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12344944
-bundleId: 10372798
+bundleId: 10444421
 url: https://luenhchang.shinyapps.io/Strava-activity-data/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .RData|chatGPT_code.R|check_shinyapps_io_accounts.R|data/activities.csv|export_Strava_activity_data.R|README.md|Strava_API_credentials.R|version-control.md|weekly-progress-dashboard-like-Strava.R|app-printscreens|exported-strava-data-from-API
+ignoredFiles: .RData|chatGPT_code.R|check_shinyapps_io_accounts.R|data/activities.csv|export_Strava_activity_data.R|global.zip|README.md|Strava_API_credentials.R|version-control.md|weekly-progress-dashboard-like-Strava.R|app-printscreens|exported-strava-data-from-API

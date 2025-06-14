@@ -16,7 +16,9 @@ library(googledrive)
 # Authenticate with Google Drive
 drive_auth()
 
-# Specify the Google Drive folder ID
+# Copy Google Drive folder ID from URL
+## Go to Google Drive > Fitness/Strava/Strava-activity-data
+## Copy the last part from the folder URL "https://drive.google.com/drive/folders/1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
 folder_id <- "1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
 
 # Define a function to read TSV files with consistent column types

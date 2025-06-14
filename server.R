@@ -22,6 +22,15 @@
 ## 2024-04-24 Created function.renderValueBox(), function.renderInfoBox() with optional arguments that have default values to generate script for renderValueBox(), renderInfoBox()
 ## 2024-04-23 Added a image slideshow under menuItem Data 
 ##---------------------------------------------------------------------------------------------------------
+
+library(shiny)
+library(shinydashboard)
+library(DT)
+library(plotly)
+library(pals)
+library(viridis)
+library(googledrive)
+
 # Get functions here
 #setwd(dir.app)
 source("functions.R")
@@ -134,7 +143,6 @@ server <- function(input, output, session) {
     ,argument.icon = icon("heartbeat")  # You can change this to any relevant Font Awesome icon
     ,argument.color = "black"
   )
-  
   
   #----------------
   # Gear usage
