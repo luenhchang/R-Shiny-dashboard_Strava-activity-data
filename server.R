@@ -9,6 +9,7 @@
 ## [Add border to stacked bar chart in plotly R](https://stackoverflow.com/questions/49868649/add-border-to-stacked-bar-chart-in-plotly-r)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-06-22 Replaced all DT::renderDataTable() with DT::renderDT()
 ## 2025-02-15 Added 3 plotly horizontal bar plots for shoe usage distance, elapsed time, moving time
 ## 2025-02-03 Sorted data by start.date.local and start.datetime.local to ensure correct stacking order in Plotly stacked bar chart of daily active hour in 2025
 ## 2025-01-22 Added total elapsed hours valueBox to This Week's Progress
@@ -629,7 +630,7 @@ server <- function(input, output, session) {
   #---------------------------------
   # DT Table with daily active hours
   #---------------------------------
-  output$dataTable.activity.moving.time <- DT::renderDataTable({
+  output$dataTable.activity.moving.time <- DT::renderDT({
     act_data.2 <- act_data.1 %>% 
       dplyr::select(start.date.local, name, sport_type,elapsed.time.hour, moving.time.hour, average_heartrate, max_heartrate, simplified.TRIMP) %>%
       dplyr::mutate(
@@ -717,7 +718,7 @@ server <- function(input, output, session) {
   # Output DT dataTable
   ## Ref [How can I introduce a new line within a column using DTedit and shiny::uiOutput?](https://stackoverflow.com/questions/56590555/how-can-i-introduce-a-new-line-within-a-column-using-dtedit-and-shinyuioutput)
   #----------------------------------------------------------------------------------------
-  output$table.poolswim <- DT::renderDataTable({
+  output$table.poolswim <- DT::renderDT({
     table.poolswim <- poolswim.combined %>% 
       dplyr::select(Strava_activity_name, Activity_date, Corrected_distance_meters, Corrected_moving_time, pace_mmss_per100meters_fmt, average_heartrate, max_heartrate) %>%
       dplyr::rename(Event=Strava_activity_name
@@ -771,7 +772,7 @@ server <- function(input, output, session) {
   #----------------------------------------------------------------------------------------
   # Output DT dataTable
   #----------------------------------------------------------------------------------------
-  output$table.walk <- DT::renderDataTable({
+  output$table.walk <- DT::renderDT({
     table.walk <- walk %>% 
       dplyr::select(name, start_date, distance, moving_time_period,total_elevation_gain, pace_mmss_per_km_fmt) %>%
       dplyr::mutate(distance=round(distance, digits = 2)
@@ -827,7 +828,7 @@ server <- function(input, output, session) {
   #--------------------
   # Output DT dataTable
   #--------------------
-  output$table.run <- DT::renderDataTable({
+  output$table.run <- DT::renderDT({
     table.run <- run %>% 
       dplyr::select(name, start_date, distance, moving_time_period, total_elevation_gain, pace_mmss_per_km_fmt, average_heartrate, max_heartrate ) %>%
       dplyr::mutate(distance=round(distance, digits = 2)
@@ -1129,7 +1130,7 @@ server <- function(input, output, session) {
   #-------------------------------------------------------------------------------------
   # DT Table with Cumulative total of ride distance and elevation gain aggregated by day
   #-------------------------------------------------------------------------------------
-  output$dataTable.cumulative.total.ride.distance.elevation.aggregated.by.day <- DT::renderDataTable({
+  output$dataTable.cumulative.total.ride.distance.elevation.aggregated.by.day <- DT::renderDT({
     ride.day.1 <- ride.day %>%
       dplyr::ungroup()%>%
       dplyr::mutate(start.date.local.start.weekday.local= paste(start.date.local, start.weekday.local)

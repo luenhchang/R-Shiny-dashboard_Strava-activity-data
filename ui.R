@@ -11,10 +11,13 @@
 ## [Horizontal Rule hr() in R Shiny Sidebar](https://stackoverflow.com/questions/43592163/horizontal-rule-hr-in-r-shiny-sidebar)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-06-22 Replaced all shiny::dataTableOutput() with DT::DTOutput()
 ## 2025-06-14 Replaced all box() with shinydashboard::box() as this error keeps popping up- Error in box: plot.new has not been called yet 75: box 1: runApp. Could be R is getting box() from base package rather than shinydashboard package
 ## 2024-07-23 Added menuItem Walk
 ## 2024-07-21 Added menuItem Swim
 ##---------------------------------------------------------------------------------------------------------
+
+library(DT)
 
 #---------------------------------
 # Webpage title on top left corner
@@ -204,7 +207,7 @@ body <- shinydashboard::dashboardBody(
                             ,solidHeader = TRUE
                             ,collapsible = TRUE
                             ,width = 12
-                            ,shiny::dataTableOutput(outputId="table.poolswim")
+                            ,DT::DTOutput(outputId="table.poolswim")
         )
       ) # Close fluidRow
     ) # Close tabItem
@@ -227,7 +230,7 @@ body <- shinydashboard::dashboardBody(
                             ,solidHeader = TRUE
                             ,collapsible = TRUE
                             ,width = 12
-                            ,shiny::dataTableOutput(outputId="table.walk"))
+                            ,DT::DTOutput(outputId="table.walk"))
       ) # Close fluidRow
     ) # Close tabItem
     #************************************
@@ -249,7 +252,7 @@ body <- shinydashboard::dashboardBody(
                             ,solidHeader = TRUE
                             ,collapsible = TRUE
                             ,width = 12
-                            ,shiny::dataTableOutput(outputId="table.run"))
+                            ,DT::DTOutput(outputId="table.run"))
       ) # Close fluidRow
     ) # Close tabItem
     

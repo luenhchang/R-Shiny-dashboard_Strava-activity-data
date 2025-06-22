@@ -36,16 +36,10 @@
 ## Required uninstalled packages in local PC will cause errors library(pkg) is not available while deploying app to shinyapps.io
 #----------------------------------------------------------------------------------------------------------
 library(dplyr)
-#library(rStrava)
-#library(googlesheets4)
+library(rStrava)
+library(googlesheets4)
 library(lubridate)
-#library(DT)
-#library(plotly)
-#library(httr)
-#library(hms)
-#library(jsonlite)
-#library(rsconnect)
-#library(usethis)
+library(DT)
 library(readr)
 
 #------------------------------------------------------------------------
@@ -87,14 +81,74 @@ info.athlete.ID.37641772 <- rStrava::get_athlete(stoken, id ='37641772')
 info.athlete.ID.37641772$id # 37641772
 profile.start.date <- as.Date(info.athlete.ID.37641772$created_at)
 
+#-----------------------------
 # Get activities by date range
-my_acts <- rStrava::get_activity_list( stoken
-                                       ,after = profile.start.date) # class(my_acts) "list"
+#-----------------------------
+# Get current year's data from Strava API
+start_of_year <- as.Date(sprintf("%d-01-01", lubridate::year(Sys.Date())))
 
-act_data <- rStrava::compile_activities(my_acts) |>
-  # [Remove columns from dataframe where ALL values are NA](https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na)
-  dplyr::select(dplyr::where(not_all_na)) 
-# class(act_data) [1] "actframe"   "data.frame" # dim(act_data) 1147 51
+current_acts <- rStrava::get_activity_list(stoken, after = start_of_year)
+
+current_data <- rStrava::compile_activities(current_acts) %>%
+  dplyr::select(where(not_all_na)) # dim(current_data) 204 51
+
+# Get column classes
+types_current <- sapply(current_data, class)
+
+# Create a readr::cols() spec from types_current
+make_col_spec_from_types <- function(types) {
+  type_map <- c(
+    "character" = "c",
+    "numeric" = "d",
+    "double"   = "d",
+    "integer"  = "i",
+    "logical"  = "l"
+  )
+  
+  readr::cols(.default = "c", !!!setNames(type_map[types], names(types)))
+}
+
+#-------------------------------------
+# Read historic data from Google drive
+#-------------------------------------
+
+# Google Drive folder containing historical TSVs
+folder_id <- "1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
+years <- 2020:2024
+
+# Enable non-interactive Google Drive access
+googledrive::drive_auth(path = "python-dashboard-440410-ed98e19552ae.json")
+
+# Read TSV from Drive directly using a temporary file
+read_year_tsv <- function(year, types_current) {
+  file_name <- sprintf("Strava-activities_%d.tsv", year)
+  gd_file <- googledrive::drive_ls(googledrive::as_id(folder_id), pattern = file_name)
+  
+  if (nrow(gd_file) == 1) {
+    temp_path <- tempfile(fileext = ".tsv")
+    
+    googledrive::drive_download(
+      googledrive::as_id(gd_file$id),
+      path = temp_path,
+      overwrite = TRUE
+    )
+    
+    col_spec <- make_col_spec_from_types(types_current)
+    readr::read_tsv(temp_path, col_types = col_spec)
+  } else {
+    warning(sprintf("File not found for year %d in Google Drive.", year))
+    return(NULL)
+  }
+}
+
+# Read all historical data
+historical_list <- lapply(years, read_year_tsv, types_current = types_current)
+historical_data <- dplyr::bind_rows(Filter(Negate(is.null), historical_list)) # dim(historical_data) 954 51
+
+#-------------------------------------
+# Combine all data into one data frame
+#-------------------------------------
+act_data <- dplyr::bind_rows(historical_data, current_data) # dim(act_data) 1158 51
 
 #*****************************************
 # Read data to use under menuItem "Swim" 
@@ -108,7 +162,7 @@ poolswim <- act_data |>
   dplyr::filter(grepl(pattern="^Indoor pool swim", x=name)) |>
   dplyr::select(dplyr::any_of(common.columns),average_heartrate, max_heartrate) |>
   # Format seconds to hh::mm::ss
-  dplyr::mutate(moving_time_hhmmss=hms::as_hms(moving_time)) # dim(poolswim) 98 8
+  dplyr::mutate(moving_time_hhmmss=hms::as_hms(moving_time)) # dim(poolswim) 100 9
 
 #--------------------------
 # Read single activity data
@@ -118,7 +172,7 @@ id.indoor.pool.swim.93 <- "12073687830"
 activity_data <- rStrava::get_activity(id = id.indoor.pool.swim.93, stoken=stoken)
 
 # Convert the list to a data frame
-activity_df <- as.data.frame(t(unlist(activity_data)), stringsAsFactors = FALSE) # dim(activity_df) 1 87
+activity_df <- as.data.frame(t(unlist(activity_data)), stringsAsFactors = FALSE) # dim(activity_df) 1 86
 
 # If there are nested lists, you might need to flatten them
 stats_df <- as.data.frame(t(unlist(activity_data$stats)), stringsAsFactors = FALSE)
@@ -193,7 +247,7 @@ walk <- act_data |>
                   ,"Distance :", distance, "km", "\n"
                   ,"Moving time :", moving_time_period, "\n"
                   ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-                ) # dim(walk) 145 14
+                ) # dim(walk) 147 14
 
 # Read a single activity of Walk from Strava using id
 ## [Retrieve streams for Strava activities, and convert to a dataframe](https://rdrr.io/cran/rStrava/man/get_activity_streams.html)
@@ -231,7 +285,7 @@ run <- act_data |>
       ,"Distance :", distance, "km", "\n"
       ,"Moving time :", moving_time_period, "\n"
       ,"Avg pace :", pace_mmss_per_km_fmt, "/km","\n")
-  ) # dim(run) 26 16
+  ) # dim(run) 55 16
 
 # Plot average speed by splits for a single activity interval run
 # activity.11732270119 <- rStrava::get_spdsplits(
@@ -277,7 +331,7 @@ act_data.1 <- act_data %>%
         (moving_time / 60) * (as.numeric(average_heartrate) - HR_resting_hypothetical) / (as.numeric(max_heartrate) - HR_resting_hypothetical)
       ,TRUE ~ NA_real_ )
     ) %>%
-  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1147 24
+  dplyr::select(-distance, -total_elevation_gain) # dim(act_data.1) 1158 24
 
 #*****************************************
 # Read data to use under menuItem "Ride" 
@@ -289,7 +343,7 @@ ride <- act_data.1 |>
   dplyr::mutate(
     # Convert seconds to lubridate duration
     ,moving_time_period=lubridate::seconds_to_period(moving_time)
-    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 348 16
+    ,moving_time_duration=lubridate::as.duration(moving_time_period)) # dim(ride) 350 16
 
 # Read single activity (not working)
 # activity.11826580247 <- rStrava::get_activity_streams(
@@ -325,7 +379,7 @@ ride.day <- ride %>%
   dplyr::group_by(start.year.local) %>%
   dplyr::arrange(start.date.local) %>%
   dplyr::mutate(ride.distance.cum.year = cumsum(distance.km.day)
-                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 331 11
+                ,ride.elevation.cum.year = cumsum(elevation.gain.m.day)) # dim(ride.day) 333 11
 
 # Calculate total ride distance, elevation per weekday, year
 ride.weekday.year <- ride %>%
@@ -468,10 +522,10 @@ activities.2024 <- act_data.1 %>%
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
-                )# dim(activities.2024) 250 24
+                )# dim(activities.2024) 250 25
 
 data.moving.time.2024 <- activities.2024 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 236 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2024) 236 25
 
 #------------------
 # Process 2025 data
@@ -484,10 +538,10 @@ activities.2025 <- act_data.1 %>%
                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
-  )# dim(activities.2025)  193 25
+  )# dim(activities.2025)  204 25
 
 data.moving.time.2025 <- activities.2025 %>%  
-  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 31 24
+  dplyr::filter(!is.na(moving.time.hour) & activity.type !="EBikeRide") # dim(data.moving.time.2025) 204 25
 
 #-------------------------------------------------------------------
 # Create data for this week progress dashboard like Strava's in 2024

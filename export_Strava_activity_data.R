@@ -3,150 +3,170 @@
 # Date created: 20-DEC-2024
 # Author(s): Lun-Hsien Chang
 # Modified from:
-# Purposes: Export strava activity data to tsv, 1 year per file. Data from current year and previous years are processed separately.
+# Purposes: 
+## Export strava activity data to 1 tsv file per year
+## Export all strava activity data to 1 tsv file
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-06-21 Exported Strava activity data from Strava API to tsv files in Google Drive
 ## 2024-12-20 Moved customed functions from global.R, server.R to here
 ##---------------------------------------------------------------------------------------------------------
 
-library(dplyr)
+library(rStrava)
+library(httr)
 library(readr)
+library(dplyr)
+library(lubridate)
 library(googledrive)
 
-# Authenticate with Google Drive
-drive_auth()
+# === 1. Authenticate ===
+stoken <- httr::config(token = readRDS('.httr-oauth')[[1]])
+googledrive::drive_auth()
 
-# Copy Google Drive folder ID from URL
-## Go to Google Drive > Fitness/Strava/Strava-activity-data
-## Copy the last part from the folder URL "https://drive.google.com/drive/folders/1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
+# === 2. Google Drive folder ID ===
 folder_id <- "1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
 
-# Define a function to read TSV files with consistent column types
-read_strava_data <- function(file_path) {
-  read_tsv(file_path, col_types = cols(
-    id = col_character(),                    # Ensure 'id' is character
-    elapsed_time = col_double(),             # Ensure 'elapsed_time' is double
-    moving_time = col_double(),              # Ensure 'moving_time' is double
-    average_heartrate = col_double(),        # Ensure 'average_heartrate' is double
-    max_heartrate = col_double(),            # Ensure 'max_heartrate' is double
-    start_date = col_datetime(format = ""),  # Ensure 'start_date' is datetime
-    start.datetime.UTC = col_datetime(format = ""),     # Ensure 'start.datetime.UTC' is datetime
-    start.date.UTC = col_date(),             # Ensure 'start.date.UTC' is date
-    start.date.local = col_date(),           # Ensure 'start.date.local' is date
-    start.date.local.day.of.year = col_double(), # Ensure 'start.date.local.day.of.year' is numeric
-    start.year.local = col_double(),         # Ensure 'start.year.local' is numeric
-    start.dayofyear.local = col_double(),    # Ensure 'start.dayofyear.local' is numeric
-    start.month.local = col_character(),     # Ensure 'start.month.local' is character (change as needed)
-    start.week.local = col_double(),         # Ensure 'start.week.local' is numeric
-    distance.km = col_double(),              # Ensure 'distance.km' is double
-    elevation.gain.m = col_double(),         # Ensure 'elevation.gain.m' is double
-    elapsed.time.hour = col_double(),        # Ensure 'elapsed.time.hour' is double
-    moving.time.hour = col_double(),         # Ensure 'moving.time.hour' is double
-    .default = col_character()               # Default to character for unspecified columns
-  ))
+# === 3. Get all activities from Strava API ===
+athlete_info <- rStrava::get_athlete(stoken, id = '37641772')
+start_date <- as.Date(athlete_info$created_at)
+
+my_acts <- rStrava::get_activity_list(
+   stoken
+  ,after = start_date
+) 
+
+act_data <- rStrava::compile_activities(my_acts) # dim(act_data) 1158 56
+
+# Remove newline characters, such as \n and \r from these rows
+##           id                                               name
+## 1 7969844552 Holland Park west #1\nTed Smout Memorial Bridge #6
+## 2 8014838770                   Dry land exercises #19, ODO321\n
+## 3 8284066587   Holland Park west #3\nMorgan's Seafood Market #4
+## 4 8806237812     Mt Coo-tha summit #93\nBrisbane Showgrounds #1
+
+act_data_clean <- act_data %>%
+  # Drop columns that are entirely NA
+  dplyr::select(where(~ !all(is.na(.)))) %>%
+  
+  # Add activity year
+  dplyr::mutate(activity_year = lubridate::year(as.Date(start_date))) %>%
+  
+  # Clean newline characters from all character columns
+  dplyr::mutate(dplyr::across(
+      dplyr::where(is.character)
+     ,~ gsub("[\r\n]+", " ", .x) %>% trimws()
+     )
+    )
+
+# Function to export data for a given year
+export_strava_yearly_data <- function(act_data, year, folder_id, types_current) {
+  if (!"activity_year" %in% names(act_data)) {
+    act_data <- act_data %>%
+      mutate(activity_year = lubridate::year(as.Date(start_date)))
+  }
+  
+  yearly_data <- act_data %>%
+    filter(activity_year == year) %>%
+    select(-activity_year)
+  
+  if (nrow(yearly_data) == 0) {
+    cat(sprintf("⚠️ No data found for year %d. Skipping.\n", year))
+    return(invisible(NULL))
+  }
+  
+  # Coerce types to match current_data
+  for (col in names(types_current)) {
+    if (col %in% names(yearly_data)) {
+      target_type <- types_current[[col]]
+      yearly_data[[col]] <- switch(target_type,
+                                   "numeric" = suppressWarnings(as.numeric(yearly_data[[col]])),
+                                   "character" = gsub("[\r\n]+", " ", as.character(yearly_data[[col]])) |> trimws(),
+                                   "logical" = as.logical(yearly_data[[col]]),
+                                   yearly_data[[col]]  # fallback: leave unchanged
+      )
+    }
+  }
+  
+  file_name <- sprintf("Strava-activities_%d.tsv", year)
+  
+  readr::write_tsv(
+    yearly_data,
+    file = file_name
+  )
+  
+  googledrive::drive_upload(
+    media = file_name,
+    path = googledrive::as_id(folder_id),
+    name = file_name,
+    overwrite = TRUE
+  )
+  
+  cat(sprintf("✅ Exported %d records for year %d → %s\n", nrow(yearly_data), year, file_name))
 }
 
-# Function to process and upload the data for all years combined
-process_all_data <- function(all_data, folder_id) {
-  # Check if a combined TSV file already exists in the Google Drive folder
-  existing_files <- drive_ls(as_id(folder_id), pattern = "Strava-activity-data\\.tsv")
+# Export data to one tsv file per year. Only do this when current year is over
+export_strava_yearly_data(act_data_clean, 2020, folder_id, types_current)
+export_strava_yearly_data(act_data_clean, 2021, folder_id, types_current)
+export_strava_yearly_data(act_data_clean, 2022, folder_id, types_current)
+export_strava_yearly_data(act_data_clean, 2023, folder_id, types_current)
+export_strava_yearly_data(act_data_clean, 2024, folder_id, types_current)
+
+# Function to export full combined data
+export_combined_strava_data <- function(act_data, folder_id) {
+  combined_file <- "Strava-activity-data.tsv"
+  
+  # Strip helper column if present
+  act_data_new <- act_data %>%
+    select(-any_of("activity_year"))
+  
+  # Try to download existing file from Drive
+  existing_files <- drive_ls(
+    path = as_id(folder_id)
+    ,pattern = "^Strava-activity-data\\.tsv$"
+  )
   
   if (nrow(existing_files) > 0) {
-    # If the file exists, download it
     drive_download(
-      as_id(existing_files$id[1]),
-      path = "Strava-activity-data.tsv",
-      overwrite = TRUE
+      file = as_id(existing_files$id[1])
+      ,path = combined_file
+      ,overwrite = TRUE
     )
     
-    # Read the existing TSV into R with specified column types
-    existing_data <- read_strava_data("Strava-activity-data.tsv")
+    # Read existing file
+    act_data_old <- read_tsv(combined_file, show_col_types = FALSE)
     
-    # Ensure consistent column types in existing_data
-    existing_data <- existing_data %>%
-      mutate(
-        id = as.character(id),
-        start_date = as.POSIXct(start_date, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC"),
-        average_heartrate = as.numeric(average_heartrate),
-        max_heartrate = as.numeric(max_heartrate),
-        start.date.local.day.of.year = as.numeric(start.date.local.day.of.year),
-        start.year.local = as.numeric(start.year.local),
-        start.dayofyear.local = as.numeric(start.dayofyear.local),
-        start.month.local = as.character(start.month.local),
-        start.week.local = as.numeric(start.week.local),
-        distance.km = as.numeric(distance.km),
-        elevation.gain.m = as.numeric(elevation.gain.m),
-        elapsed.time.hour = as.numeric(elapsed.time.hour),
-        moving.time.hour = as.numeric(moving.time.hour)
-      )
+    # Combine and deduplicate by Strava activity ID
+    full_data <- bind_rows(act_data_old, act_data_new) %>%
+      distinct(id, .keep_all = TRUE)
     
-    # Ensure consistent column types in all_data before combining
-    all_data <- all_data %>%
-      mutate(
-        id = as.character(id),
-        start_date = as.POSIXct(start_date, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC"),
-        average_heartrate = as.numeric(average_heartrate),
-        max_heartrate = as.numeric(max_heartrate),
-        start.date.local.day.of.year = as.numeric(start.date.local.day.of.year),
-        start.year.local = as.numeric(start.year.local),
-        start.dayofyear.local = as.numeric(start.dayofyear.local),
-        start.month.local = as.character(start.month.local),
-        start.week.local = as.numeric(start.week.local),
-        distance.km = as.numeric(distance.km),
-        elevation.gain.m = as.numeric(elevation.gain.m),
-        elapsed.time.hour = as.numeric(elapsed.time.hour),
-        moving.time.hour = as.numeric(moving.time.hour)
-      )
-    
-    # Combine the new data with the existing data
-    combined_data <- bind_rows(existing_data, all_data)
-    
-    # Write the combined data back to a single TSV file
-    write_tsv(combined_data, "Strava-activity-data.tsv")
-    
-    # Upload the updated file back to Google Drive
-    drive_upload(
-      media = "Strava-activity-data.tsv",
-      path = as_id(folder_id),
-      name = "Strava-activity-data.tsv",
-      overwrite = TRUE
-    )
-    
-    cat("All data has been combined and the file has been updated.\n")
+    cat(sprintf("ℹ️ Existing file found: merged %d old + %d new → %d total\n",
+                nrow(act_data_old), nrow(act_data_new), nrow(full_data)))
   } else {
-    # If the file does not exist, create and upload it
-    write_tsv(all_data, "Strava-activity-data.tsv")
-    drive_upload(
-      media = "Strava-activity-data.tsv",
-      path = as_id(folder_id),
-      name = "Strava-activity-data.tsv",
-      overwrite = TRUE
-    )
-    cat("A new file has been created and uploaded to Google Drive.\n")
+    # No existing file, use only new data
+    full_data <- act_data_new
+    cat("ℹ️ No existing file found. Creating a new one.\n")
   }
+  
+  # Write merged data
+  write_tsv(
+    full_data
+    ,combined_file
+  )
+  
+  # Upload back to Drive
+  drive_upload(
+    media = combined_file
+    ,path = as_id(folder_id)
+    ,name = combined_file
+    ,overwrite = TRUE
+  )
+  
+  cat(sprintf("✅ Combined data (%d records) exported to %s\n", nrow(full_data), combined_file))
 }
 
-# Assuming act_data.1 is your data containing Strava activities
-# Ensure the data is in a suitable format
-act_data_clean <- act_data.1 %>%
-  mutate(
-    id = as.character(id),
-    start_date = as.POSIXct(start_date, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC"),
-    average_heartrate = as.numeric(average_heartrate),
-    max_heartrate = as.numeric(max_heartrate),
-    start.date.local.day.of.year = as.numeric(start.date.local.day.of.year),
-    start.year.local = as.numeric(start.year.local),
-    start.dayofyear.local = as.numeric(start.dayofyear.local),
-    start.month.local = as.character(start.month.local),
-    start.week.local = as.numeric(start.week.local),
-    distance.km = as.numeric(distance.km),
-    elevation.gain.m = as.numeric(elevation.gain.m),
-    elapsed.time.hour = as.numeric(elapsed.time.hour),
-    moving.time.hour = as.numeric(moving.time.hour)
-  )
+export_combined_strava_data(
+   act_data=act_data_clean
+  ,folder_id=folder_id)
 
-# Process and upload all data as a single TSV file
-process_all_data(act_data_clean, folder_id)
 
-# Notify the user the export process is complete
-cat("Export process complete.\n")
+cat("✅ All exports completed.\n")
