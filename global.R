@@ -18,6 +18,7 @@
 ## [Ordering columns in Plotly horizontal bar chart](https://stackoverflow.com/questions/53285059/ordering-columns-in-plotly-horizontal-bar-chart)
 ## Date       Changes:
 ##---------------------------------------------------------------------------------------------------------
+## 2025-07-05 Changed source of historic data from Google Drive to local data folder
 ## 2025-06-12 App run well locally but had this error when deploying to shinyapps.io- An error has occurred Unable to connect to worker after 60.00 seconds; startup took too long. Contact the author for more information.
 ## 2024-12-31 Lawn mowing included in top left-aligned legend of Activity hours in 2024 plot
 ## 2024-12-31 Added Lawn mowing in activity.type.
@@ -109,41 +110,30 @@ make_col_spec_from_types <- function(types) {
 }
 
 #-------------------------------------
-# Read historic data from Google drive
+# Read historic data from /data folder
 #-------------------------------------
 
-# Google Drive folder containing historical TSVs
-folder_id <- "1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
+# Relative folder path for deployment
+local_data_folder <- "data"
 years <- 2020:2024
 
-# Enable non-interactive Google Drive access
-googledrive::drive_auth(path = "python-dashboard-440410-ed98e19552ae.json")
-
-# Read TSV from Drive directly using a temporary file
-read_year_tsv <- function(year, types_current) {
+# Function to read local TSV by year
+read_year_tsv_local <- function(year, types_current, folder_path = local_data_folder) {
   file_name <- sprintf("Strava-activities_%d.tsv", year)
-  gd_file <- googledrive::drive_ls(googledrive::as_id(folder_id), pattern = file_name)
+  file_path <- file.path(folder_path, file_name)
   
-  if (nrow(gd_file) == 1) {
-    temp_path <- tempfile(fileext = ".tsv")
-    
-    googledrive::drive_download(
-      googledrive::as_id(gd_file$id),
-      path = temp_path,
-      overwrite = TRUE
-    )
-    
+  if (file.exists(file_path)) {
     col_spec <- make_col_spec_from_types(types_current)
-    readr::read_tsv(temp_path, col_types = col_spec)
+    readr::read_tsv(file_path, col_types = col_spec)
   } else {
-    warning(sprintf("File not found for year %d in Google Drive.", year))
+    warning(sprintf("⚠️ File not found for year %d in local folder: %s", year, file_path))
     return(NULL)
   }
 }
 
 # Read all historical data
-historical_list <- lapply(years, read_year_tsv, types_current = types_current)
-historical_data <- dplyr::bind_rows(Filter(Negate(is.null), historical_list)) # dim(historical_data) 954 51
+historical_list <- lapply(years, read_year_tsv_local, types_current = types_current)
+historical_data <- dplyr::bind_rows(Filter(Negate(is.null), historical_list))  # dim(historical_data) 954 51
 
 #-------------------------------------
 # Combine all data into one data frame
@@ -535,7 +525,8 @@ activities.2025 <- act_data.1 %>%
   dplyr::arrange(start.datetime.local) %>%
   dplyr::mutate(activity.type= 
                   dplyr::case_when(
-                    grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
+                     grepl(pattern = "lawn mow", x=name, ignore.case = TRUE) ~ "Lawn mowing"
+                    ,grepl(pattern = "lawn edging", x=name, ignore.case = TRUE) ~ "Lawn edging" 
                     ,grepl(pattern = "gardening", x=name, ignore.case = TRUE) ~ "Gardening"
                     ,TRUE ~ sport_type)
   )# dim(activities.2025)  204 25

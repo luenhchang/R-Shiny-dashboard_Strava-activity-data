@@ -19,23 +19,22 @@ library(dplyr)
 library(lubridate)
 library(googledrive)
 
-# === 1. Authenticate ===
+# Authenticate
 stoken <- httr::config(token = readRDS('.httr-oauth')[[1]])
 googledrive::drive_auth()
 
-# === 2. Google Drive folder ID ===
+# Google Drive folder ID
 folder_id <- "1k495O3mJw56Vv5ldDI3C7yZK_JyAUB6A"
 
-# === 3. Get all activities from Strava API ===
+# Get all activities from Strava API
 athlete_info <- rStrava::get_athlete(stoken, id = '37641772')
 start_date <- as.Date(athlete_info$created_at)
 
 my_acts <- rStrava::get_activity_list(
    stoken
-  ,after = start_date
-) 
+  ,after = start_date) # class(my_acts) [1] "list"
 
-act_data <- rStrava::compile_activities(my_acts) # dim(act_data) 1158 56
+act_data <- rStrava::compile_activities(my_acts) # dim(act_data) 1176 56
 
 # Remove newline characters, such as \n and \r from these rows
 ##           id                                               name
@@ -56,18 +55,18 @@ act_data_clean <- act_data %>%
       dplyr::where(is.character)
      ,~ gsub("[\r\n]+", " ", .x) %>% trimws()
      )
-    )
+    ) # dim(act_data_clean) 1176 52
 
-# Function to export data for a given year
-export_strava_yearly_data <- function(act_data, year, folder_id, types_current) {
+# Function to export data to a Google Drive folder for a given year
+export_strava_yearly_data_to_Google_Drive <- function(act_data, year, folder_id, types_current) {
   if (!"activity_year" %in% names(act_data)) {
     act_data <- act_data %>%
-      mutate(activity_year = lubridate::year(as.Date(start_date)))
+      dplyr::mutate(activity_year = lubridate::year(as.Date(start_date)))
   }
   
   yearly_data <- act_data %>%
-    filter(activity_year == year) %>%
-    select(-activity_year)
+    dplyr::filter(activity_year == year) %>%
+    dplyr::select(-activity_year)
   
   if (nrow(yearly_data) == 0) {
     cat(sprintf("⚠️ No data found for year %d. Skipping.\n", year))
@@ -78,11 +77,11 @@ export_strava_yearly_data <- function(act_data, year, folder_id, types_current) 
   for (col in names(types_current)) {
     if (col %in% names(yearly_data)) {
       target_type <- types_current[[col]]
-      yearly_data[[col]] <- switch(target_type,
-                                   "numeric" = suppressWarnings(as.numeric(yearly_data[[col]])),
-                                   "character" = gsub("[\r\n]+", " ", as.character(yearly_data[[col]])) |> trimws(),
-                                   "logical" = as.logical(yearly_data[[col]]),
-                                   yearly_data[[col]]  # fallback: leave unchanged
+      yearly_data[[col]] <- switch( target_type
+                                   ,"numeric" = suppressWarnings(as.numeric(yearly_data[[col]]))
+                                   ,"character" = gsub("[\r\n]+", " ", as.character(yearly_data[[col]])) |> trimws()
+                                   ,"logical" = as.logical(yearly_data[[col]])
+                                   ,yearly_data[[col]]  # fallback: leave unchanged
       )
     }
   }
@@ -95,21 +94,21 @@ export_strava_yearly_data <- function(act_data, year, folder_id, types_current) 
   )
   
   googledrive::drive_upload(
-    media = file_name,
-    path = googledrive::as_id(folder_id),
-    name = file_name,
-    overwrite = TRUE
+     media = file_name
+    ,path = googledrive::as_id(folder_id)
+    ,name = file_name
+    ,overwrite = TRUE
   )
   
   cat(sprintf("✅ Exported %d records for year %d → %s\n", nrow(yearly_data), year, file_name))
 }
 
 # Export data to one tsv file per year. Only do this when current year is over
-export_strava_yearly_data(act_data_clean, 2020, folder_id, types_current)
-export_strava_yearly_data(act_data_clean, 2021, folder_id, types_current)
-export_strava_yearly_data(act_data_clean, 2022, folder_id, types_current)
-export_strava_yearly_data(act_data_clean, 2023, folder_id, types_current)
-export_strava_yearly_data(act_data_clean, 2024, folder_id, types_current)
+export_strava_yearly_data_to_Google_Drive(act_data_clean, 2020, folder_id, types_current)
+export_strava_yearly_data_to_Google_Drive(act_data_clean, 2021, folder_id, types_current)
+export_strava_yearly_data_to_Google_Drive(act_data_clean, 2022, folder_id, types_current)
+export_strava_yearly_data_to_Google_Drive(act_data_clean, 2023, folder_id, types_current)
+export_strava_yearly_data_to_Google_Drive(act_data_clean, 2024, folder_id, types_current)
 
 # Function to export full combined data
 export_combined_strava_data <- function(act_data, folder_id) {
@@ -168,5 +167,60 @@ export_combined_strava_data(
    act_data=act_data_clean
   ,folder_id=folder_id)
 
-
 cat("✅ All exports completed.\n")
+
+# Function to export data to a local folder for a given year
+export_strava_yearly_data_to_local_folder <- function( act_data
+                                                      ,year
+                                                      ,folder_path = "C:/GoogleDrive_MyDrive/scripts/RProject_Shinyapp_Strava-activity-data/data"
+                                                      , types_current = NULL) {
+  if (!"activity_year" %in% names(act_data)) {
+    act_data <- act_data %>%
+      dplyr::mutate(activity_year = lubridate::year(as.Date(start_date)))
+  }
+  
+  yearly_data <- act_data %>%
+    dplyr::filter(activity_year == year) %>%
+    dplyr::select(-activity_year)
+  
+  if (nrow(yearly_data) == 0) {
+    cat(sprintf("⚠️ No data found for year %d. Skipping local export.\n", year))
+    return(invisible(NULL))
+  }
+  
+  # If provided, coerce types to match current_data
+  if (!is.null(types_current)) {
+    for (col in names(types_current)) {
+      if (col %in% names(yearly_data)) {
+        target_type <- types_current[[col]]
+        yearly_data[[col]] <- switch( target_type
+                                      ,"numeric" = suppressWarnings(as.numeric(yearly_data[[col]]))
+                                      ,"character" = gsub("[\r\n]+", " ", as.character(yearly_data[[col]])) |> trimws()
+                                      ,"logical" = as.logical(yearly_data[[col]])
+                                      ,yearly_data[[col]]  # fallback
+        )
+      }
+    }
+  }
+  
+  file_name <- sprintf("Strava-activities_%d.tsv", year)
+  full_path <- file.path(folder_path, file_name)
+  
+  # Create directory if it doesn't exist
+  if (!dir.exists(folder_path)) {
+    dir.create(folder_path, recursive = TRUE)
+  }
+  
+  readr::write_tsv(
+    yearly_data,
+    file = full_path
+  )
+  
+  cat(sprintf("✅ Local export completed: %s (%d records)\n", full_path, nrow(yearly_data)))
+}
+
+export_strava_yearly_data_to_local_folder(act_data_clean, 2020, types_current = types_current)
+export_strava_yearly_data_to_local_folder(act_data_clean, 2021, types_current = types_current)
+export_strava_yearly_data_to_local_folder(act_data_clean, 2022, types_current = types_current)
+export_strava_yearly_data_to_local_folder(act_data_clean, 2023, types_current = types_current)
+export_strava_yearly_data_to_local_folder(act_data_clean, 2024, types_current = types_current)
